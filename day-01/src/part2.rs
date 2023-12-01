@@ -1,4 +1,8 @@
+//! Library code for Part 2 of Advent of Code 2023 for Day-01
+//! `bin > part2.rs` will run this code along with conent of `input2.txt`
+
 use crate::custom_error::AocError;
+use miette::Result;
 use tracing::info;
 
 /// Take first and last digit char or digit word (may be the same!)
@@ -7,31 +11,33 @@ use tracing::info;
 /// WARNING: this does NOT resolve ambiguous word cases like "oneight"
 /// NOTE: hackish fix, sorted words in order of length, with hand check for no overlap
 #[tracing::instrument]
-pub fn process(input: &str) -> miette::Result<u32, AocError> {
-    let mut nums = Vec::<u32>::new();
+pub fn process(input: &str) -> Result<u32, AocError> {
+        let mut nums = Vec::<u32>::new();
 
-    // lines
-    for ln in input.lines() {
-        // ascii digits
-        let chars: Vec<char> = prepend_digits_to_words(ln)
-            .chars()
-            .filter(|c| c.is_ascii_digit())
-            .collect();
+        // lines
+        for ln in input.lines() {
+                // ascii digits
+                let chars: Vec<char> = prepend_digits_to_words(ln)
+                        .chars()
+                        .filter(|c| c.is_ascii_digit())
+                        .collect();
 
-        info!("{:?}", chars);
+                info!("{:?}", chars);
 
-        // extracting, formatting, parsing, pushing
-        if let (Some(&first), Some(&last)) = (chars.first(), chars.last()) {
-            let str_num = format!("{}{}", first, last);
-            match str_num.parse::<u32>() {
-                Ok(num) => nums.push(num),
-                Err(_) => panic!("Could not parse: {} \nfrom line: {}", str_num, ln),
-            }
+                // extracting, formatting, parsing, pushing
+                if let (Some(&first), Some(&last)) = (chars.first(), chars.last()) {
+                        let str_num = format!("{}{}", first, last);
+                        match str_num.parse::<u32>() {
+                                Ok(num) => nums.push(num),
+                                Err(_) => {
+                                        panic!("Could not parse: {} \nfrom line: {}", str_num, ln)
+                                }
+                        }
+                }
         }
-    }
 
-    info!("{:?}", nums);
-    Ok(nums.into_iter().sum())
+        info!("{:?}", nums);
+        Ok(nums.into_iter().sum())
 }
 
 #[tracing::instrument(level = "trace", skip(input))]
@@ -46,32 +52,32 @@ pub fn process(input: &str) -> miette::Result<u32, AocError> {
 /// (e.g. "six" & "sixty") -- those are not among the patterns we're using
 /// but it still bears notw
 fn prepend_digits_to_words(input: &str) -> String {
-    let mut output: Vec<char> = input.chars().collect();
-    let mut replace_notes = Vec::<(usize, &str)>::new();
-    let replace_sets = vec![
-        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-    ];
+        let mut output: Vec<char> = input.chars().collect();
+        let mut replace_notes = Vec::<(usize, &str)>::new();
+        let replace_sets = vec![
+                "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+        ];
 
-    for pat in replace_sets {
-        replace_notes.extend(input.match_indices(pat));
-    }
-    for (idx, pat) in replace_notes {
-        let add = match pat {
-            "one" => '1',
-            "two" => '2',
-            "three" => '3',
-            "four" => '4',
-            "five" => '5',
-            "six" => '6',
-            "seven" => '7',
-            "eight" => '8',
-            "nine" => '9',
-            _ => panic!("Could not match: {}", pat),
-        };
-        output[idx] = add;
-    }
+        for pat in replace_sets {
+                replace_notes.extend(input.match_indices(pat));
+        }
+        for (idx, pat) in replace_notes {
+                let add = match pat {
+                        "one" => '1',
+                        "two" => '2',
+                        "three" => '3',
+                        "four" => '4',
+                        "five" => '5',
+                        "six" => '6',
+                        "seven" => '7',
+                        "eight" => '8',
+                        "nine" => '9',
+                        _ => panic!("Could not match: {}", pat),
+                };
+                output[idx] = add;
+        }
 
-    output.into_iter().collect::<String>()
+        output.into_iter().collect::<String>()
 }
 
 #[tracing::instrument(level = "trace", skip(input))]
@@ -85,45 +91,45 @@ fn prepend_digits_to_words(input: &str) -> String {
 /// There are no current tests for these overlaps
 /// NOTE: hackish fix, sorted in order of length, with hand check for no overlap
 fn words_to_digits(input: &str) -> String {
-    // making compatible with our old version
-    let replace_sets = vec![
-        // 5
-        ("seven", "7"),
-        ("eight", "8"),
-        ("three", "3"),
-        // 4
-        ("four", "4"),
-        ("five", "5"),
-        ("nine", "9"),
-        // 3
-        ("one", "1"),
-        ("two", "2"),
-        ("six", "6"),
-    ];
+        // making compatible with our old version
+        let replace_sets = vec![
+                // 5
+                ("seven", "7"),
+                ("eight", "8"),
+                ("three", "3"),
+                // 4
+                ("four", "4"),
+                ("five", "5"),
+                ("nine", "9"),
+                // 3
+                ("one", "1"),
+                ("two", "2"),
+                ("six", "6"),
+        ];
 
-    replace_sets
-        .iter()
-        .fold(input.to_string(), |acc, (word, digit)| {
-            acc.replace(word, digit)
-        })
+        replace_sets
+                .iter()
+                .fold(input.to_string(), |acc, (word, digit)| {
+                        acc.replace(word, digit)
+                })
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+        use super::*;
 
-    #[test]
-    fn test_process() -> miette::Result<()> {
-        tracing_subscriber::fmt::init();
+        #[test]
+        fn test_process() -> Result<()> {
+                tracing_subscriber::fmt::init();
 
-        let input = "two1nine
+                let input = "two1nine
 eightwothree
 abcone2threexyz
 xtwone3four
 4nineeightseven2
 zoneight234
 7pqrstsixteen";
-        assert_eq!(process(input)?, 281);
-        Ok(())
-    }
+                assert_eq!(process(input)?, 281);
+                Ok(())
+        }
 }
