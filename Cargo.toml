@@ -1,0 +1,51 @@
+[workspace]
+resolver = "2"
+members = ["day-*", "www"]
+
+[workspace.dependencies]
+# Logging
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"
+# Iteration extensions
+itertools = "0.12.0"
+# Error handling
+miette = { version = "5.10", features = ["fancy"] }
+thiserror = "1.0.50"
+anyhow = "1.0.75"
+# Math
+nalgebra = "0.32.3"
+glam = "0.24.2"
+petgraph = "0.6.4"
+rand = "0.8.5"
+# Parsing
+nom = "7.1.3"
+# Parallelization
+rayon = "1.8.0"
+# Testing
+rstest = "0.18.2"
+rstest_reuse = "0.6.0"
+# Convenience
+strum = "0.25.0"
+derive_more = "0.99.17"
+# Profiling
+divan = "0.1.3"
+tracing-tracy = "0.10.4"
+tracy-client = "0.16.4"
+tracy-client-sys = "0.22.0"
+dhat = "0.3.2"
+
+[profile.flamegraph]
+inherits = "release"
+debug = true
+
+[profile.dhat]
+inherits = "release"
+debug = 1
+
+# Defines a size-optimized profile for the WASM bundle in release mode
+[profile.wasm-release]
+inherits = "release"
+opt-level = 'z'
+lto = true
+codegen-units = 1
+panic = "abort"
