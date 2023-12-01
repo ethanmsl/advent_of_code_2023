@@ -1,6 +1,4 @@
 use crate::custom_error::AocError;
-use regex::Regex;
-use regex::RegexSet;
 use tracing::info;
 
 /// Take first and last digit char or digit word (may be the same!)
@@ -45,7 +43,7 @@ pub fn process(input: &str) -> miette::Result<u32, AocError> {
 /// WARN: Not relevant for what we're testing for, but
 /// the strategy below will be corrupt if used with left-aligned overlapping patterns
 /// (e.g. "six" & "sixty") -- those are not among the patterns we're using
-/// but it still bears note
+/// but it still bears notw
 fn prepend_digits_to_words(input: &str) -> String {
     let mut output: Vec<char> = input.chars().collect();
     let mut replace_notes = Vec::<(usize, &str)>::new();
@@ -75,6 +73,10 @@ fn prepend_digits_to_words(input: &str) -> String {
     output.into_iter().collect::<String>()
 }
 
+#[allow(dead_code)]
+///NOTE: here as an example of a non-working approach
+/// the problem weakness was noted at creation, however
+/// I was surprised to see the test set use that form of input
 /// takes a string reference and creates a new string with number words iteratively replaced by digits
 /// WARNING: this is *iterative* "oneight" will become "1ight"
 /// (vs 18, on8, or neither)
