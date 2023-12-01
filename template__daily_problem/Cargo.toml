@@ -14,7 +14,6 @@ itertools = { workspace = true }
 # Error handling
 miette = { workspace = true }
 thiserror = { workspace = true }
-anyhow = { workspace = true }
 # Math
 nalgebra = { workspace = true }
 glam = { workspace = true }
