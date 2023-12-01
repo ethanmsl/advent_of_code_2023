@@ -10,8 +10,10 @@ lint day_digits:
     clippy-tracing --action check --exclude target --exclude benches --exclude www
     cargo clippy -p day-{{day_digits}}
 # TODO: "day-01" hard coded, also unclear goal
-test part_digit +FLAGS='-p day-01':
-    cargo nextest run {{FLAGS}} part{{part_digit}}
+test day_digits part_digit:
+    cargo nextest run -p day-{{day_digits}} part{{part_digit}}
+# test part_digit +FLAGS='-p day-01':
+#     cargo nextest run {{FLAGS}} part{{part_digit}}
 bench-all:
     cargo bench -q > benchmarks.txt
 bench day_digits part_digit:
