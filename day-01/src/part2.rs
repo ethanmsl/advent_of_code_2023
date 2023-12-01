@@ -15,7 +15,7 @@ pub fn process(input: &str) -> miette::Result<u32, AocError> {
     // lines
     for ln in input.lines() {
         // ascii digits
-        let chars: Vec<char> = words_to_digits(ln)
+        let chars: Vec<char> = prepend_digits_to_words(ln)
             .chars()
             .filter(|c| c.is_ascii_digit())
             .collect();
@@ -40,40 +40,32 @@ pub fn process(input: &str) -> miette::Result<u32, AocError> {
 /// this will not interfere with overlapping words of the lengths in question
 /// And this will preserve order of words' occurence
 fn prepend_digits_to_words(input: &str) -> String {
-    let set = RegexSet::new(&[
-        r"one", r"two", r"three", r"four", r"five", r"six", r"seven", r"eight", r"nine",
-    ])
-    .expect("invalid regex creation");
-
-    // Iterate over and collect all of the matches.
-    let matches: Vec<_> = set.matches("foobar").into_iter().collect();
-    assert_eq!(matches, vec![0, 2, 3, 4, 6]);
-
-    // You can also test whether a particular regex matched:
-    let matches = set.matches("foobar");
-    assert!(!matches.matched(5));
-    assert!(matches.matched(6));
-    let output = input.to_string();
-    // data for reference
+    let mut output: Vec<char> = input.chars().collect();
+    let mut replace_notes = Vec::<(usize, &str)>::new();
     let replace_sets = vec![
-        ("one", '1'),
-        ("two", '2'),
-        ("three", '3'),
-        ("four", '4'),
-        ("five", '5'),
-        ("six", '6'),
-        ("seven", '7'),
-        ("eight", '8'),
-        ("nine", '9'),
+        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
     ];
 
-    for (find, add) in replace_sets {
-        if let Some(idx) = output.match_indices(find) {
-            output.insert(idx, add)
-        }
+    for pat in replace_sets {
+        replace_notes.extend(input.match_indices(pat));
+    }
+    for (idx, pat) in replace_notes {
+        let add = match pat {
+            "one" => '1',
+            "two" => '2',
+            "three" => '3',
+            "four" => '4',
+            "five" => '5',
+            "six" => '6',
+            "seven" => '7',
+            "eight" => '8',
+            "nine" => '9',
+            _ => panic!("Could not match: {}", pat),
+        };
+        output[idx] = add;
     }
 
-    output
+    output.into_iter().collect::<String>()
 }
 
 /// takes a string reference and creates a new string with number words iteratively replaced by digits
