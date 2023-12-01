@@ -16,9 +16,14 @@ www-build:
 lint day_digits:
     cargo clippy -p day-{{day_digits}}
 
-# TODO: "day-01" hard coded, also unclear goal
+# uses novel `cargo nextest` and a separate docs test
 test day_digits part_digit:
     cargo nextest run -p day-{{day_digits}} part{{part_digit}}
+    cargo test -p day-{{day_digits}} --doc
+
+# uses traditional `cargo test`
+test-trad day_digits part_digit:
+    cargo test -p day-{{day_digits}} --lib part{{part_digit}}
 
 # test part_digit +FLAGS='-p day-01':
 #     cargo nextest run {{FLAGS}} part{{part_digit}}
