@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["day-*", "www"]
+members = ["day-*"]
 
 [workspace.dependencies]
 # Logging
