@@ -39,6 +39,13 @@ pub fn process(input: &str) -> miette::Result<u32, AocError> {
 /// This will put a digit char infront of words from left to right
 /// this will not interfere with overlapping words of the lengths in question
 /// And this will preserve order of words' occurence
+/// PERF: Note: replacing this and the above pattern with a
+/// state machine that can do ordered adds would be superior
+/// Though it would still have potential issues with overlapping patterns
+/// WARN: Not relevant for what we're testing for, but
+/// the strategy below will be corrupt if used with left-aligned overlapping patterns
+/// (e.g. "six" & "sixty") -- those are not among the patterns we're using
+/// but it still bears note
 fn prepend_digits_to_words(input: &str) -> String {
     let mut output: Vec<char> = input.chars().collect();
     let mut replace_notes = Vec::<(usize, &str)>::new();
