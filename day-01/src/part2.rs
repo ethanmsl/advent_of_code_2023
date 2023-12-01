@@ -34,6 +34,7 @@ pub fn process(input: &str) -> miette::Result<u32, AocError> {
     Ok(nums.into_iter().sum())
 }
 
+#[tracing::instrument(level = "trace", skip(input))]
 /// This will put a digit char infront of words from left to right
 /// this will not interfere with overlapping words of the lengths in question
 /// And this will preserve order of words' occurence
@@ -73,6 +74,7 @@ fn prepend_digits_to_words(input: &str) -> String {
     output.into_iter().collect::<String>()
 }
 
+#[tracing::instrument(level = "trace", skip(input))]
 #[allow(dead_code)]
 ///NOTE: here as an example of a non-working approach
 /// the problem weakness was noted at creation, however
