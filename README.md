@@ -25,3 +25,7 @@ cargo install cargo-show-asm
 cargo install cargo-nextest --locked
 cargo install just
 ```
+
+```shell
+brew install tracy
+```
