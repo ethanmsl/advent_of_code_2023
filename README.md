@@ -24,6 +24,7 @@ cargo install cargo-expand
 cargo install cargo-show-asm
 cargo install cargo-nextest --locked
 cargo install just
+cargo install clippy-tracing
 ```
 
 ```shell
