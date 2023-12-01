@@ -7,6 +7,7 @@ For overview of Setup see the "My Setup" section of this youtube video: [How to 
 
 ## To create new daily file:
 
-`just create day-XY`
+`just create XY`
 
 NOTE: syntax is important as justfile uses this when executing other commands
+NOTE: justfile rewritten to take 2-digit numbers for day and a 1-digit number for part. (instead of "day-XY" and "partz")
