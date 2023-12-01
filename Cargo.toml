@@ -11,7 +11,6 @@ itertools = "0.12.0"
 # Error handling
 miette = { version = "5.10", features = ["fancy"] }
 thiserror = "1.0.50"
-anyhow = "1.0.75"
 # Math
 nalgebra = "0.32.3"
 glam = "0.24.2"
