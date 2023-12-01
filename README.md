@@ -13,3 +13,15 @@ NOTE: syntax is important as justfile uses this when executing other commands
 NOTE: justfile rewritten to take 2-digit numbers for day and a 1-digit number for part. (instead of "day-XY" and "partz")
 
 TODO: have the `todo!(D)ay __)` template text auto populated on creation
+
+### Accessories used, for install Needs:
+
+```shell
+cargo install cargo-watch
+cargo install cargo-generate
+cargo install flamegraph
+cargo install cargo-expand
+cargo install cargo-show-asm
+cargo install cargo-nextest --locked
+cargo install just
+```
