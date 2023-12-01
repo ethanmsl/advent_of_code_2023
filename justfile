@@ -14,7 +14,6 @@ www-build:
 
 # TODO: failure; unkown reason
 lint day_digits:
-    clippy-tracing --action check --exclude target --exclude benches --exclude www
     cargo clippy -p day-{{day_digits}}
 
 # TODO: "day-01" hard coded, also unclear goal
