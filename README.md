@@ -11,3 +11,5 @@ For overview of Setup see the "My Setup" section of this youtube video: [How to 
 
 NOTE: syntax is important as justfile uses this when executing other commands
 NOTE: justfile rewritten to take 2-digit numbers for day and a 1-digit number for part. (instead of "day-XY" and "partz")
+
+TODO: have the `todo!(D)ay __)` template text auto populated on creation
