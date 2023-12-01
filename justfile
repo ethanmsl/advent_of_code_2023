@@ -1,21 +1,21 @@
-work day part:
-    cargo watch -x "check -p {{day}}" -s "just test {{part}} -p {{day}}" -s "just lint {{day}}" -s "just bench {{day}} {{part}}" -s "just flamegraph {{day}} {{part}}"
+work day_digits part_digit:
+    cargo watch -x "check -p day-{{day_digits}}" -s "just test part{{part_digit}} -p day-{{day_digits}}" -s "just lint day-{{day_digits}}" -s "just bench day-{{day_digits}} part{{part_digit}}" -s "just flamegraph day-{{day_digits}} part{{part_digit}}"
 www-watch:
    RUST_LOG=info cargo +nightly leptos watch --project www
 www-build:
    cargo +nightly leptos build --project www --release
-lint day:
+lint day_digits:
     clippy-tracing --action check --exclude target --exclude benches --exclude www
-    cargo clippy -p {{day}}
-test part +FLAGS='-p day-01':
-    cargo nextest run {{FLAGS}} {{part}}
+    cargo clippy -p day-{{day_digits}}
+test part_digit +FLAGS='-p day-01':
+    cargo nextest run {{FLAGS}} part{{part_digit}}
 bench-all:
     cargo bench -q > benchmarks.txt
-bench day part:
-    cargo bench --bench {{day}} {{part}} >> {{day}}.bench.txt
-flamegraph day part:
-    cargo flamegraph --profile flamegraph --root --package {{day}} --bin {{part}} -o flamegraphs/{{day}}--{{part}}.svg
-dhat day part:
-    cargo run --profile dhat --features dhat-heap --package {{day}} --bin {{part}}
-create day:
-    cargo generate --path ./template__daily_problem --name {{day}}
+bench day_digits part_digit:
+    cargo bench --bench day-{{day_digits}} partpart{{part_digit}} >> day-{{day_digits}}.bench.txt
+flamegraph day_digits part_digit:
+    cargo flamegraph --profile flamegraph --root --package day-{{day_digits}} --bin part{{part_digit}} -o flamegraphs/day-{{day_digits}}--part{{part_digit}}.svg
+dhat day_digits part_digit:
+    cargo run --profile dhat --features dhat-heap --package day-{{day_digits}} --bin part{{part_digit}}
+create day_digits:
+    cargo generate --path ./template__daily_problem --name day-{{day_digits}}
