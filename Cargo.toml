@@ -19,6 +19,7 @@ petgraph = "0.6.4"
 rand = "0.8.5"
 # Parsing
 nom = "7.1.3"
+regex = "1.10.2"
 # Parallelization
 rayon = "1.8.0"
 # Testing

@@ -1,4 +1,6 @@
 use crate::custom_error::AocError;
+use regex::Regex;
+use regex::RegexSet;
 use tracing::info;
 
 /// Take first and last digit char or digit word (may be the same!)
@@ -34,8 +36,47 @@ pub fn process(input: &str) -> miette::Result<u32, AocError> {
     Ok(nums.into_iter().sum())
 }
 
-/// takes a string reference and creates a new string with number words iteratively replaced by
-/// digits
+/// This will put a digit char infront of words from left to right
+/// this will not interfere with overlapping words of the lengths in question
+/// And this will preserve order of words' occurence
+fn prepend_digits_to_words(input: &str) -> String {
+    let set = RegexSet::new(&[
+        r"one", r"two", r"three", r"four", r"five", r"six", r"seven", r"eight", r"nine",
+    ])
+    .expect("invalid regex creation");
+
+    // Iterate over and collect all of the matches.
+    let matches: Vec<_> = set.matches("foobar").into_iter().collect();
+    assert_eq!(matches, vec![0, 2, 3, 4, 6]);
+
+    // You can also test whether a particular regex matched:
+    let matches = set.matches("foobar");
+    assert!(!matches.matched(5));
+    assert!(matches.matched(6));
+    let output = input.to_string();
+    // data for reference
+    let replace_sets = vec![
+        ("one", '1'),
+        ("two", '2'),
+        ("three", '3'),
+        ("four", '4'),
+        ("five", '5'),
+        ("six", '6'),
+        ("seven", '7'),
+        ("eight", '8'),
+        ("nine", '9'),
+    ];
+
+    for (find, add) in replace_sets {
+        if let Some(idx) = output.match_indices(find) {
+            output.insert(idx, add)
+        }
+    }
+
+    output
+}
+
+/// takes a string reference and creates a new string with number words iteratively replaced by digits
 /// WARNING: this is *iterative* "oneight" will become "1ight"
 /// (vs 18, on8, or neither)
 /// There are no current tests for these overlaps
