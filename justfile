@@ -40,5 +40,6 @@ flamegraph day_digits part_digit:
 dhat day_digits part_digit:
     cargo run --profile dhat --features dhat-heap --package day-{{day_digits}} --bin part{{part_digit}}
 
+# Create day-specific crate
 create day_digits:
     cargo generate --path ./template__daily_problem --name day-{{day_digits}}
