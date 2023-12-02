@@ -1,0 +1,12 @@
+# [placeholders.hypervisor]
+# default = "spirit-of-giving"
+# type = "string"
+# prompt = "Seasonal Mascot for this Day's Project?"
+# choices = [
+#         "reindeer",
+#         "elf",
+#         "abominable snowperson",
+#         "santoid",
+#         "living coal",
+#         "spirit-of-giving",
+# ]

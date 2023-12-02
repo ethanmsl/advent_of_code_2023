@@ -1,7 +1,7 @@
-//! Part 2 of Advent of Code 2023 for  Day-__.
-//! Runs `part2.rs` library code against `input2.txt`
+//! Part 2 of Advent of Code 2023 for {{ project-name | title_case }}.
+//! Runs `part2_lib.rs` library code against `input2.txt`
 
-use {{crate_name}}::part2::process;
+use {{crate_name}}::part2_lib::process;
 use miette::{Context, Result};
 
 #[cfg(feature = "dhat-heap")]
