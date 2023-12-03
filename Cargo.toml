@@ -19,6 +19,7 @@ rand = "0.8.5"
 # Parsing
 nom = "7.1.3"
 regex = "1.10.2"
+regex-automata = "0.4.3"
 # Parallelization
 rayon = "1.8.0"
 # Testing
