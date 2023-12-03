@@ -17,9 +17,8 @@ mod tests {
         fn test_process_example() -> Result<()> {
                 tracing_subscriber::fmt::init();
 
-                todo!("haven't built test yet");
                 let input = "";
-                let expected = "";
+                let expected = todo!();
                 assert_eq!(process(input)?, expected);
                 Ok(())
         }
@@ -32,7 +31,7 @@ mod tests {
         #[test]
         fn test_process_problem_input() -> Result<()> {
                 let file_input = include_str!("../input2.txt");
-                let expected = "";
+                let expected = todo!();
                 assert_eq!(process(file_input)?, expected);
                 Ok(())
         }
