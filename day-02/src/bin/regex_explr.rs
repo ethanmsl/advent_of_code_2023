@@ -2,17 +2,28 @@ use anyhow::Result;
 use regex::Regex;
 
 fn main() -> Result<()> {
-        let re = Regex::new(r"(?m)^([^:]+):([0-9]+):(.+)$").unwrap();
-        let hay = "\
-path/to/foo:54:Blue Harvest
-path/to/bar:90:Something, Something, Something, Dark Side
-path/to/baz:3:It's a Trap!
-";
+        // let re = Regex::new(r"(?m)^([^:]+):([0-9]+):(.+)$").unwrap();
+        let re_id = Regex::new(r"Game (\d*):").unwrap();
+        let re_r = Regex::new(r"(\d*) blue").unwrap();
+        let re_g = Regex::new(r"(\d*) green").unwrap();
+        let re_b = Regex::new(r"(\d*) red").unwrap();
 
-        let mut results = vec![];
-        for (_, [path, lineno, line]) in re.captures_iter(hay).map(|c| c.extract()) {
-                results.push((path, lineno.parse::<u64>()?, line));
+        let hay = "\
+Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+Game 202: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
+Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
+Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
+Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green";
+
+        let mut ids = vec![];
+        for (_, [id]) in re_id.captures_iter(hay).map(|c| c.extract()) {
+                ids.push(id.parse::<u64>()?);
         }
+        let mut results = vec![];
+        for (full, [capture]) in re_r.captures_iter(hay).map(|c| c.extract()) {
+                results.push((full.to_string(), capture));
+        }
+        dbg!(ids);
         dbg!(results);
         Ok(())
 }
