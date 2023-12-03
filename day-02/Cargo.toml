@@ -1,0 +1,47 @@
+[package]
+name = "day-02"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# Logging
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+# Iteration extensions
+itertools = { workspace = true }
+# Error handling
+miette = { workspace = true }
+thiserror = { workspace = true }
+# Math
+nalgebra = { workspace = true }
+glam = { workspace = true }
+petgraph = { workspace = true }
+rand = { workspace = true }
+# Parsing
+nom = { workspace = true }
+# Parallelization
+rayon = { workspace = true }
+# Testing
+rstest = { workspace = true }
+rstest_reuse = { workspace = true }
+# Convenience
+strum = { workspace = true }
+derive_more = { workspace = true }
+# Profiling
+# tracing-tracy = { workspace = true }
+# tracy-client = { workspace = true }
+# tracy-client-sys = { workspace = true }
+dhat = { workspace = true }
+
+[dev-dependencies]
+divan = { workspace = true }
+
+[[bench]]
+name = "day-02"
+path = "benches/benchmarks.rs"
+harness = false
+
+[features]
+dhat-heap = []
