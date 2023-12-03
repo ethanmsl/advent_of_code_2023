@@ -81,21 +81,24 @@ fn extract_data(hay: &str) -> (u64, Cubes) {
                         let (_, [val]) = c.extract();
                         val.parse::<u64>().expect("red parse failure")
                 })
-                .sum();
+                .max()
+                .unwrap_or(0);
         let g_sum = regex_lazyonce!(GREEN_PAT)
                 .captures_iter(hay)
                 .map(|c| {
                         let (_, [val]) = c.extract();
                         val.parse::<u64>().expect("green parse failure")
                 })
-                .sum();
+                .max()
+                .unwrap_or(0);
         let b_sum = regex_lazyonce!(BLUE_PAT)
                 .captures_iter(hay)
                 .map(|c| {
                         let (_, [val]) = c.extract();
                         val.parse::<u64>().expect("blue parse failure")
                 })
-                .sum();
+                .max()
+                .unwrap_or(0);
 
         (
                 id,
