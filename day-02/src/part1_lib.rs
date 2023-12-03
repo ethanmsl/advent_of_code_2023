@@ -10,16 +10,8 @@ pub fn process(_input: &str) -> Result<String, AocErrorDay02> {
         todo!("day 02 - part 1");
 }
 
-// // const string, to make a pattern
-// const BLUE_CAP_PATTERN: &str = r"(\d+) Blue";
-
-// ERROR: I thnk the `regex!` macro was deprecated
-// need to read more
-// static with compile time macro
-static BLUE_CAP_REGEX: &Regex = regex!(r"(\d+) Blue");
-
-// // regular definition with compile time macro
-// let re = regex::regex!(r"(\d+) Blue");
+// const string ... not really a regex (would need automata crate and include_bytes)
+const BLUE_CAP_PATTERN: &str = r"(\d+) Blue";
 
 const MAX_CUBES: Cubes = Cubes {
         red: 12,
