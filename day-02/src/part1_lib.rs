@@ -24,7 +24,12 @@ macro_rules! regex_lazyonce {
         }};
 }
 
-const DUMB_PAT: &str = r"(\d+) (\w+), (\d+) (\w+), (\d+) (\w+), (\d+) (\w+);";
+// // for testing for pathological inputs
+// const DUMB_PAT: &str = r"(\d+) (\w+), (\d+) (\w+), (\d+) (\w+), (\d+) (\w+);";
+//                 regex_lazyonce!(DUMB_PAT).captures_iter(line).for_each(|c| {
+//                         let (needle, _): (&str, [&str; 6]) = c.extract();
+//                         info!("{:?}", needle);
+//                 });
 const ID_PAT: &str = r"Game (\d+):";
 const RED_PAT: &str = r"(\d+) red";
 const GREEN_PAT: &str = r"(\d+) green";
@@ -52,19 +57,11 @@ impl Cubes {
 
 // #[tracing::instrument]
 pub fn process(input: &str) -> Result<u64, AocErrorDay02> {
-        // dbg!(input);
-
         let mut id_sum = 0;
         for line in input.lines() {
-                regex_lazyonce!(DUMB_PAT).captures_iter(line).for_each(|c| {
-                        let (needle, _): (&str, [&str; 6]) = c.extract();
-                        info!("{:?}", needle);
-                });
                 let (id, line_cubes) = extract_data(line);
                 if line_cubes.is_subset_of(&MAX_CUBES) {
-                        // info!(line, ?line_cubes, id_sum, id);
                         id_sum += id;
-                        // info!(id_sum);
                 }
         }
         Ok(id_sum)
