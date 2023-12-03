@@ -1,4 +1,4 @@
-//! Part 2 of Advent of Code 2023 for {{ project-name | title_case }}.
+//! Part 2 of {{ project-name | title_case }} for Advent of Code 2023.
 //! Runs `part2_lib.rs` library code against `input2.txt`
 
 use {{crate_name}}::part2_lib::process;
