@@ -1,4 +1,29 @@
-# Future Perf
+# Day 01 Notes (README) for Advent of Code 2023
+
+## Notable Takeaways
+
+- Lack of natural orderability of patterns in linear spaces.
+- Regex DFAs are uncommon in practice. (partly an API and gen. knowledge issue and partly due to many practical regex considerations, including compilation time, size, and probably many perf issues in execution level matching algorithms)
+
+## Questions
+
+- [x] regex defined DFAs on stack?
+- [] **regex-automata** crate allows this; bin to serialize and `include_bytes!()` to roll into main binary.
+- [x] DFA construction macros and efficiency?
+  - [] some interesting options; noted elsewhere
+- [] Impact of ASCII restrictions on comparisons and Performance?
+- [] Impact of direct byte comparisons on Performance?
+
+## Rust Syntax Heroes
+
+- `.extend()`
+  - Extends a collection by an iterator.
+
+## Rust Crate Heroes
+
+- n/a
+
+## PERFs
 
 The questions were a natural fit for DFA implemented regex. (up to my ignorance of various instruction set level optimizations; at the least.)
 However, looking a many regex crates I did not find what I was looking for.
@@ -51,3 +76,8 @@ From a bit of reading in the regex-automata docs `Dense` will be compilation lon
 
 (I'm curious about mixing DFAs and their memory representation -- e.g. shared states for SIX & SIXTEEN)
 By default nothing of the sort seems to occur. Naturally enough. THough this is in principle computable. I'm also _very_ curious to start looking at the perf tradeoffs.
+
+## GENERALIZATIONs
+
+- Natural generalizations of this have inherrent performance problems as there's no 'natural' ordering of patterns of varying lengths whose extents can overlap in multiple ways. e.g. `SIX` & `SIXTEEN` (and `SIXTY` & `SIXTEEN`). Or `AAA-BBB` & `BBB-CCC`.
+  - Finding logical graphs who map cleanly to machine action graphs is an interesting problem.
