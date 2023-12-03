@@ -22,6 +22,7 @@ rstest_reuse = { workspace = true }
 # tracy-client-sys = { workspace = true }
 dhat = { workspace = true }
 regex.workspace = true
+once_cell.workspace = true
 
 [dev-dependencies]
 divan = { workspace = true }
