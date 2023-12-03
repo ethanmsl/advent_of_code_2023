@@ -36,12 +36,28 @@ mod tests {
         use super::*;
 
         #[test]
-        fn test_process() -> Result<()> {
+        fn test_process_example() -> Result<()> {
+                tracing_subscriber::fmt::init();
+
                 let input = "1abc2
 pqr3stu8vwx
 a1b2c3d4e5f
 treb7uchet";
-                assert_eq!(process(input)?, 142);
+                let expected = 142;
+                assert_eq!(process(input)?, expected);
+                Ok(())
+        }
+
+        /// This test's expected value is to be populated after
+        /// verification of solution.  
+        /// (useful for future refactors and perfs)
+        /// NOTE: `#[ignore]` is set for this test by default.
+        // #[ignore]
+        #[test]
+        fn test_process_problem_input() -> Result<()> {
+                let file_input = include_str!("../input1.txt");
+                let expected = 55621;
+                assert_eq!(process(file_input)?, expected);
                 Ok(())
         }
 }

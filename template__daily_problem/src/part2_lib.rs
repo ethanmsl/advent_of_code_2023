@@ -14,10 +14,26 @@ mod tests {
         use super::*;
 
         #[test]
-        fn test_process() -> Result<()> {
+        fn test_process_example() -> Result<()> {
+                tracing_subscriber::fmt::init();
+
                 todo!("haven't built test yet");
                 let input = "";
-                assert_eq!(process(input)?, "");
+                let expected = "";
+                assert_eq!(process(input)?, expected);
+                Ok(())
+        }
+
+        /// This test's expected value is to be populated after
+        /// verification of solution.  
+        /// (useful for future refactors and perfs)
+        /// NOTE: `#[ignore]` is set for this test by default.
+        #[ignore]
+        #[test]
+        fn test_process_problem_input() -> Result<()> {
+                let file_input = include_str!("../input2.txt");
+                let expected = "";
+                assert_eq!(process(file_input)?, expected);
                 Ok(())
         }
 }
