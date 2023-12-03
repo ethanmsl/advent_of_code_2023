@@ -24,6 +24,7 @@ macro_rules! regex_lazyonce {
         }};
 }
 
+const DUMB_PAT: &str = r"(\d+) (\w+), (\d+) (\w+), (\d+) (\w+), (\d+) (\w+);";
 const ID_PAT: &str = r"Game (\d+):";
 const RED_PAT: &str = r"(\d+) red";
 const GREEN_PAT: &str = r"(\d+) green";
@@ -51,13 +52,19 @@ impl Cubes {
 
 // #[tracing::instrument]
 pub fn process(input: &str) -> Result<u64, AocErrorDay02> {
+        // dbg!(input);
+
         let mut id_sum = 0;
         for line in input.lines() {
+                regex_lazyonce!(DUMB_PAT).captures_iter(line).for_each(|c| {
+                        let (needle, _): (&str, [&str; 6]) = c.extract();
+                        info!("{:?}", needle);
+                });
                 let (id, line_cubes) = extract_data(line);
                 if line_cubes.is_subset_of(&MAX_CUBES) {
-                        info!(line, ?line_cubes, id_sum, id);
+                        // info!(line, ?line_cubes, id_sum, id);
                         id_sum += id;
-                        info!(id_sum);
+                        // info!(id_sum);
                 }
         }
         Ok(id_sum)
@@ -132,11 +139,11 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green";
         /// verification of solution.  
         /// (useful for future refactors and perfs)
         /// NOTE: `#[ignore]` is set for this test by default.
-        #[ignore]
+        // #[ignore]
         #[test]
         fn test_process_problem_input() -> Result<()> {
                 let file_input = include_str!("../input1.txt");
-                let expected = todo!();
+                let expected = 3059;
                 assert_eq!(process(file_input)?, expected);
                 Ok(())
         }
