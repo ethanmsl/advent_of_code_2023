@@ -3,6 +3,7 @@
 
 use crate::custom_error::AocErrorDay02;
 use anyhow::Result;
+use tracing::info;
 
 /// Example helpfully provided by the `once_cell` crate's documentation.
 ///
@@ -34,20 +35,29 @@ const MAX_CUBES: Cubes = Cubes {
 };
 
 /// set of cubes
-#[derive(Debug, PartialEq, PartialOrd)]
+#[derive(Debug, PartialEq)]
 struct Cubes {
-        red: u32,
-        green: u32,
-        blue: u32,
+        red: u64,
+        green: u64,
+        blue: u64,
 }
 
-#[tracing::instrument]
-pub fn process(input: &str) -> Result<u32, AocErrorDay02> {
+impl Cubes {
+        /// whether a is a ~subset (inclusive) of b
+        fn is_subset_of(&self, other: &Self) -> bool {
+                (self.red <= other.red) && (self.green <= other.green) && (self.blue <= other.blue)
+        }
+}
+
+// #[tracing::instrument]
+pub fn process(input: &str) -> Result<u64, AocErrorDay02> {
         let mut id_sum = 0;
         for line in input.lines() {
                 let (id, line_cubes) = extract_data(line);
-                if line_cubes <= MAX_CUBES {
+                if line_cubes.is_subset_of(&MAX_CUBES) {
+                        info!(line, ?line_cubes, id_sum, id);
                         id_sum += id;
+                        info!(id_sum);
                 }
         }
         Ok(id_sum)
@@ -58,32 +68,32 @@ pub fn process(input: &str) -> Result<u32, AocErrorDay02> {
 /// Not sure of  a better way to do this if usign regex_macro
 /// ... I should just have defined the regex as static with lazy
 /// and then iterated over them.
-fn extract_data(hay: &str) -> (u32, Cubes) {
+fn extract_data(hay: &str) -> (u64, Cubes) {
         let id = regex_lazyonce!(ID_PAT)
                 .captures(hay)
                 .expect("captures iter failure")
                 .get(1)
-                .map(|v| v.as_str().parse::<u32>().expect("id parse failure"))
+                .map(|v| v.as_str().parse::<u64>().expect("id parse failure"))
                 .expect("iteration failure");
         let r_sum = regex_lazyonce!(RED_PAT)
                 .captures_iter(hay)
                 .map(|c| {
                         let (_, [val]) = c.extract();
-                        val.parse::<u32>().expect("red parse failure")
+                        val.parse::<u64>().expect("red parse failure")
                 })
                 .sum();
         let g_sum = regex_lazyonce!(GREEN_PAT)
                 .captures_iter(hay)
                 .map(|c| {
                         let (_, [val]) = c.extract();
-                        val.parse::<u32>().expect("green parse failure")
+                        val.parse::<u64>().expect("green parse failure")
                 })
                 .sum();
         let b_sum = regex_lazyonce!(BLUE_PAT)
                 .captures_iter(hay)
                 .map(|c| {
                         let (_, [val]) = c.extract();
-                        val.parse::<u32>().expect("blue parse failure")
+                        val.parse::<u64>().expect("blue parse failure")
                 })
                 .sum();
 
