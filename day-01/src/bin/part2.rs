@@ -1,7 +1,7 @@
-//! Library code for Part 2 of Advent of Code 2023 for Day-01
-//! `bin > part2.rs` will run this code along with conent of `input2.txt`
+//! Part 2 of Day 01 of Advent of Code 2023.
+//! Runs `part2_lib.rs` library code against `input2.txt`
 
-use day_01::part2::process;
+use day_01::part2_lib::process;
 use miette::{Context, Result};
 
 #[cfg(feature = "dhat-heap")]

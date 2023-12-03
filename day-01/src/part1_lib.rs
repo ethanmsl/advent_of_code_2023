@@ -1,4 +1,4 @@
-//! Library code for Part 1 of Advent of Code 2023 for Day-01
+//! Library code for Part 1 of Day 01 of Advent of Code 2023.
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
 
 use crate::custom_error::AocError;
