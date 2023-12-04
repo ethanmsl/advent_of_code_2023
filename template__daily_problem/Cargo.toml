@@ -14,6 +14,8 @@ miette = { workspace = true }
 thiserror = { workspace = true }
 # Testing
 test-case = { workspace = true }
+# Convenience
+indoc = { workspace = true }
 # Profiling
 # tracing-tracy = { workspace = true }
 # tracy-client = { workspace = true }

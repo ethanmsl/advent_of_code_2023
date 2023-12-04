@@ -16,6 +16,8 @@ thiserror = { workspace = true }
 # Testing
 rstest = { workspace = true }
 rstest_reuse = { workspace = true }
+# Convenience
+indoc = { workspace = true }
 # Profiling
 # tracing-tracy = { workspace = true }
 # tracy-client = { workspace = true }
