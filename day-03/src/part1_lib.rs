@@ -4,7 +4,6 @@
 use crate::custom_error::AocErrorDay03;
 use miette::Result;
 use regex::Regex;
-use test_case::test_case;
 use tracing::info;
 
 /// Return sum of values adjacent to special chars
@@ -24,12 +23,8 @@ pub fn process(_input: &str) -> Result<u64, AocErrorDay03> {
         todo!("day 03 - part 1");
 }
 
-// #[test_case(".....+.58." => (0,10); ":shrug:")]
-#[test_case("0123XXX789" => (4,7); ":shrug:2")]
 fn find_number(hay: &str) -> (usize, usize) {
-        tracing_subscriber::fmt::init();
-
-        let pat = r"X+";
+        let pat = r"\d+";
         let re = Regex::new(pat).unwrap();
         let m = re.find(hay).unwrap();
         info!("{}", &hay[m.start()..m.end()]);
