@@ -3,7 +3,6 @@
 
 use crate::custom_error::AocErrorDay02;
 use anyhow::Result;
-use tracing::info;
 
 /// Example helpfully provided by the `once_cell` crate's documentation.
 ///

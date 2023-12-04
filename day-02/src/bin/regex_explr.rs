@@ -1,6 +1,4 @@
 use anyhow::Result;
-use once_cell::sync::Lazy;
-use regex::Regex;
 
 /// Example helpfully provided by the `once_cell` crate's documentation.
 ///
