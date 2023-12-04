@@ -26,6 +26,7 @@ rayon = "1.8.0"
 # Testing
 rstest = "0.18.2"
 rstest_reuse = "0.6.0"
+test-case = "3.3.1"
 # Convenience
 strum = "0.25.0"
 derive_more = "0.99.17"

@@ -13,8 +13,7 @@ tracing-subscriber = { workspace = true }
 miette = { workspace = true }
 thiserror = { workspace = true }
 # Testing
-rstest = { workspace = true }
-rstest_reuse = { workspace = true }
+test-case = { workspace = true }
 # Profiling
 # tracing-tracy = { workspace = true }
 # tracy-client = { workspace = true }
