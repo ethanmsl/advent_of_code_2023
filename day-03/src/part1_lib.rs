@@ -2,11 +2,22 @@
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
 
 use crate::custom_error::AocErrorDay03;
-use indoc::indoc;
 use miette::Result;
 
+/// Return sum of values adjacent to special chars
+///
+/// ## Proposed Flow
+/// - get number locations --> map each to number
+/// - get special locations --> calculate adjacency locations
+/// - use adjacencies to look up numbers
+///
+/// ## Assumptions
+/// - Numbers are left to write contiguous digits
+/// (no vertical by horizontal crossings; no horizontal overlaps:
+/// each digit part of a single number)
+/// - ascii input
 #[tracing::instrument]
-pub fn process(_input: &str) -> Result<String, AocErrorDay03> {
+pub fn process(_input: &str) -> Result<u64, AocErrorDay03> {
         todo!("day 03 - part 1");
 }
 
@@ -31,7 +42,7 @@ mod tests {
                         ...$.*....
                         .664.598..
                 "};
-                let expected = todo!();
+                let expected = 114;
                 assert_eq!(process(input)?, expected);
                 Ok(())
         }
