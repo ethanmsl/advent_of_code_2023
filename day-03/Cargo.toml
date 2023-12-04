@@ -12,8 +12,7 @@ tracing-subscriber = { workspace = true }
 # Error handling
 miette = { workspace = true }
 thiserror = { workspace = true }
-# Testing
-test-case = { workspace = true }
+test-case.workspace = true
 # Convenience
 indoc = { workspace = true }
 # Profiling
