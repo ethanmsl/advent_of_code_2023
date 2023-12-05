@@ -19,7 +19,7 @@ use tracing::info;
 /// (no vertical by horizontal crossings; no horizontal overlaps:
 /// each digit part of a single number)
 /// - ascii input
-// #[tracing::instrument]
+#[tracing::instrument]
 pub fn process(input: &str) -> Result<u64, AocErrorDay03> {
         let mut numbers = NumberRegister::new();
         let mut adjacencies = SpecialAdjacenciesRegister::new();
