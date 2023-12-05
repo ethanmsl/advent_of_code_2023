@@ -2,8 +2,12 @@
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
 
 use crate::custom_error::AocErrorDay03;
+use crate::data_types::{NumberRegister, SpecialAdjacenciesRegister};
+use derive_more::{AsMut, AsRef, Constructor, Display, IntoIterator};
 use miette::Result;
 use regex::Regex;
+use std::collections::{HashMap, HashSet};
+use std::ops::Range;
 use tracing::info;
 
 /// Return sum of values adjacent to special chars
@@ -11,7 +15,8 @@ use tracing::info;
 /// ## Proposed Flow
 /// - get number locations --> map each to number
 /// - get special locations --> calculate adjacency locations
-/// - use adjacencies to look up numbers
+/// - comapre number locations against adjacencies
+///   - you only want one of each number
 ///
 /// ## Assumptions
 /// - Numbers are left to write contiguous digits
@@ -19,17 +24,25 @@ use tracing::info;
 /// each digit part of a single number)
 /// - ascii input
 #[tracing::instrument]
-pub fn process(_input: &str) -> Result<u64, AocErrorDay03> {
-        todo!("day 03 - part 1");
-}
+pub fn process(input: &str) -> Result<u64, AocErrorDay03> {
+        let mut numbers = NumberRegister::new();
+        let mut adjacencies = SpecialAdjacenciesRegister::new();
+        // register numbers & special chars
+        input.lines().enumerate().for_each(|(row, raw_line)| {
+                numbers.register_numbers((row, rawline));
+                adjacencies.register_special_adjacencies((row, raw_line));
+        });
 
-fn find_number(hay: &str) -> (usize, usize) {
-        let pat = r"\d+";
-        let re = Regex::new(pat).unwrap();
-        let m = re.find(hay).unwrap();
-        info!("{}", &hay[m.start()..m.end()]);
-        info!("{}", m.as_str());
-        (m.start(), m.end())
+        let mut sum = 0;
+        for number in numbers {
+                for location in number.locations() {
+                        if adjacencies.contains(location) {
+                                sum += number.val();
+                                break;
+                        }
+                }
+        }
+        Ok(sum)
 }
 
 #[cfg(test)]
