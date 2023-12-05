@@ -1,14 +1,14 @@
-//! Library code for Part 2 of {{ project-name | title_case }} of Advent of Code 2023.
+//! Library code for Part 2 of Day 04 of Advent of Code 2023.
 //! `bin > part2.rs` will run this code along with conent of `input2.txt`
 
-use crate::custom_error::AocError{{project-name | upper_camel_case}};
+use crate::custom_error::AocErrorDay04;
 use miette::Result;
 use tracing::info;
 
 #[tracing::instrument]
-pub fn process(input: &str) -> Result<i64, AocError{{project-name | upper_camel_case}}> {
-        info!("Hiii. from  {{ project-name | kebab-case }} Part2! :)");
-        todo!("{{project-name | title_case | downcase}} - Part 2");
+pub fn process(input: &str) -> Result<i64, AocErrorDay04> {
+        info!("Hiii. from  day-04 Part2! :)");
+        todo!("day 04 - Part 2");
 }
 
 #[cfg(test)]
