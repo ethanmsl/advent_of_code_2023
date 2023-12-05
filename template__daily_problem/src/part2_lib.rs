@@ -3,21 +3,28 @@
 
 use crate::custom_error::AocError{{project-name | upper_camel_case}};
 use miette::Result;
+use tracing::info;
 
 #[tracing::instrument]
 pub fn process(input: &str) -> Result<i64, AocError{{project-name | upper_camel_case}}> {
-        todo!("{{project-name | title_case | downcase}} - part 2");
+        info!("Hiii. from  {{ project-name | kebab-case }} Part2! :)");
+        todo!("{{project-name | title_case | downcase}} - Part 2");
 }
 
 #[cfg(test)]
 mod tests {
         use super::*;
+        use indoc::indoc;
 
         #[test]
         fn test_process_example() -> Result<()> {
                 tracing_subscriber::fmt::init();
 
-                let input = "";
+                let input = indoc! {"
+                        ...
+                        ...
+                        ...
+                "};
                 let expected = todo!();
                 assert_eq!(process(input)?, expected);
                 Ok(())
