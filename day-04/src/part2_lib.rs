@@ -23,9 +23,17 @@ const NUM: &str = r"(\d+)";
 pub fn process(input: &str) -> Result<u64, AocErrorDay04> {
         todo!("copy of part1, not implemented yet");
         info!("Hiii. from  day-04 Part1! :)");
-        let pile: CardPile = input.lines().collect();
+        let orig_pile: CardPile = input.lines().collect();
 
-        Ok(pile.into_iter()
+        // add copy value to each card (mutable)
+        // iteratively (top down) get cards id & # wins
+        // increment copy value of each card below
+        // continue on
+        // copy value update is equal to a cards own copy value
+        // as you can only be modified by cards a bove you a single pass iteration should be fine
+        // (kindness: no need to deal with bottom of pile boundry)
+        Ok(orig_pile
+                .into_iter()
                 .map(|card| card.wining_haves_overlap())
                 .filter(|&n| n > 0)
                 .map(|n| 2u64.pow(n as u32 - 1))
