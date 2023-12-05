@@ -2,8 +2,9 @@
 //! `bin > part2.rs` will run this code along with conent of `input2.txt`
 
 use crate::custom_error::AocErrorDay03;
-use crate::data_types_part2::{NumberRegister, SpecialAdjacenciesRegister};
+use crate::data_types_part2::{NumberRegister, StarAndAdjacenciesRegister};
 use miette::Result;
+use std::collections::HashMap;
 use tracing::info;
 
 /// Basically we need to do the same thing, but now we need
@@ -12,27 +13,29 @@ use tracing::info;
 /// (adn then sum or something)
 #[tracing::instrument]
 pub fn process(input: &str) -> Result<u64, AocErrorDay03> {
-        todo!(); // below is just a copy of part1
         let mut numbers = NumberRegister::new();
-        let mut adjacencies = SpecialAdjacenciesRegister::new();
+        let mut star_adjacencies = StarAndAdjacenciesRegister::new();
 
         // register numbers & special chars
         input.lines().enumerate().for_each(|(row, raw_line)| {
                 numbers.register_numbers(row as i64, raw_line);
-                adjacencies.register_special_adjacencies(row as i64, raw_line);
+                star_adjacencies.register_special_adjacencies(row as i64, raw_line);
         });
 
-        info!("numbers: {:?}", numbers);
-        info!("adjacencies: {:?}", adjacencies);
-        // check what numbers are adjacent
+        // check what numbers are adjacent to each star
         let mut sum = 0;
-        for number in numbers {
-                info!("number: {:?}", number.val());
-                for location in number.locations() {
-                        if adjacencies.contains(location) {
-                                sum += number.val();
-                                break;
-                        }
+        for (id, locations) in star_adjacencies.hmap {
+                let mut adjacent_nums = HashMap::new();
+                'inner: for location in locations {
+                        match numbers.hmap.get(&location) {
+                                Some(numinf) => adjacent_nums.insert(numinf.id(), numinf.val()),
+                                None => continue 'inner,
+                        };
+                }
+                if adjacent_nums.len() == 2 {
+                        let product = adjacent_nums.values().product::<u64>();
+                        info!(?id, ?product);
+                        sum += product;
                 }
         }
         Ok(sum)
