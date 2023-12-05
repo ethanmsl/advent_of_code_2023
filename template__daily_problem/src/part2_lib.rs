@@ -7,7 +7,7 @@ use tracing::info;
 
 #[tracing::instrument]
 pub fn process(input: &str) -> Result<i64, AocError{{project-name | upper_camel_case}}> {
-        info!("Hiii. from  {{ project-name | kebab-case }} Part2! :)");
+        info!("Hiii. from  {{ project-name | kebab_case }} Part2! :)");
         todo!("{{project-name | title_case | downcase}} - Part 2");
 }
 
