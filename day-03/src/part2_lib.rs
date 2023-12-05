@@ -67,16 +67,15 @@ mod tests {
                 Ok(())
         }
 
-        // /// This test's expected value is to be populated after
-        // /// verification of solution.
-        // /// (useful for future refactors and perfs)
-        // /// NOTE: `#[ignore]` is set for this test by default.
-        // #[ignore]
-        // #[test]
-        // fn test_process_problem_input() -> Result<()> {
-        //         let file_input = include_str!("../input2.txt");
-        //         let expected: String = todo!();
-        //         assert_eq!(process(file_input)?, expected);
-        //         Ok(())
-        // }
+        /// This test's expected value is to be populated after
+        /// verification of solution.
+        /// (useful for future refactors and perfs)
+        /// NOTE: `#[ignore]` is set for this test by default.
+        #[test]
+        fn test_process_problem_input() -> Result<()> {
+                let file_input = include_str!("../input2.txt");
+                let expected = 87287096;
+                assert_eq!(process(file_input)?, expected);
+                Ok(())
+        }
 }
