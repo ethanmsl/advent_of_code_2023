@@ -21,9 +21,8 @@ const NUM: &str = r"(\d+)";
 
 // #[tracing::instrument]
 pub fn process(input: &str) -> Result<u64, AocErrorDay04> {
-        todo!("copy of part1, not implemented yet");
         info!("Hiii. from  day-04 Part1! :)");
-        let orig_pile: CardPile = input.lines().collect();
+        let mut pile: CardPile = input.lines().collect();
 
         // add copy value to each card (mutable)
         // iteratively (top down) get cards id & # wins
@@ -32,12 +31,14 @@ pub fn process(input: &str) -> Result<u64, AocErrorDay04> {
         // copy value update is equal to a cards own copy value
         // as you can only be modified by cards a bove you a single pass iteration should be fine
         // (kindness: no need to deal with bottom of pile boundry)
-        Ok(orig_pile
-                .into_iter()
-                .map(|card| card.wining_haves_overlap())
-                .filter(|&n| n > 0)
-                .map(|n| 2u64.pow(n as u32 - 1))
-                .sum())
+        let pile_size = pile.cards().len();
+        for card_id in 1..=pile_size {
+                pile.update_copies(card_id as u64);
+        }
+
+        info!("pile: {:?}", pile);
+
+        Ok(pile.cards().into_iter().map(|c| c.copies()).sum())
 }
 
 /// Represents a single scratch card.
@@ -45,13 +46,20 @@ pub fn process(input: &str) -> Result<u64, AocErrorDay04> {
 #[derive(Constructor, Debug, PartialEq, Eq)]
 struct ScratchCard {
         id: u64,
-        // wins_arr: [u64; 5],
-        // haves_arr: [u64; 8],
-        wins_arr: [u64; 10],
-        haves_arr: [u64; 25],
+        copies: u64,
+        wins_arr: [u64; 5],
+        haves_arr: [u64; 8],
+        // wins_arr: [u64; 10],
+        // haves_arr: [u64; 25],
 }
 
 impl ScratchCard {
+        /// number of copies of a card
+        /// (all cards start at 1)
+        fn copies(&self) -> u64 {
+                self.copies
+        }
+
         /// Gives the number of winning nums
         /// assumes wins_arr could be a set (i.e. ignoring non-uniqueness) while haves_arr may have
         /// duplicates
@@ -61,6 +69,7 @@ impl ScratchCard {
                         .filter(|&n| self.wins_arr.contains(n))
                         .count() as u64
         }
+
         /// NOTE: the multiple refernces to splits is error prone
         fn from_str(line: &str) -> Option<Self> {
                 // static RE_CARD: Lazy<Regex> = Lazy::new(|| Regex::new(CARD_NUM).unwrap());
@@ -74,15 +83,16 @@ impl ScratchCard {
                         .collect();
 
                 match ordered_nums.len() {
-                        // 14 => Some(ScratchCard::new(
-                        36 => Some(ScratchCard::new(
+                        14 => Some(ScratchCard::new(
+                                // 36 => Some(ScratchCard::new(
                                 ordered_nums[0],
-                                // ordered_nums[1..6]
-                                ordered_nums[1..11]
+                                1,
+                                ordered_nums[1..6]
+                                        // ordered_nums[1..11]
                                         .try_into()
                                         .expect("vec to array failure: A"),
-                                // ordered_nums[6..36]
-                                ordered_nums[11..36]
+                                ordered_nums[6..14]
+                                        // ordered_nums[11..36]
                                         .try_into()
                                         .expect("vec to array failure: B"),
                         )),
@@ -104,6 +114,17 @@ impl CardPile {
         /// Gives a mutable reference to the pile's cards
         fn cards(&mut self) -> &mut Vec<ScratchCard> {
                 &mut self.0
+        }
+
+        fn update_copies(&mut self, card_id: u64) {
+                let loc = card_id as usize - 1;
+                let head_card = &self.cards()[loc];
+                let head_copies = head_card.copies();
+
+                let wins = head_card.wining_haves_overlap() as usize;
+                for card in &mut self.cards()[loc + 1..=loc + wins] {
+                        card.copies += head_copies;
+                }
         }
 }
 
