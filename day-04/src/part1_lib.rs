@@ -72,7 +72,7 @@ impl ScratchCard {
                                 ordered_nums[1..11]
                                         .try_into()
                                         .expect("vec to array failure: A"),
-                                // ordered_nums[6..36]
+                                // ordered_nums[6..14]
                                 ordered_nums[11..36]
                                         .try_into()
                                         .expect("vec to array failure: B"),
