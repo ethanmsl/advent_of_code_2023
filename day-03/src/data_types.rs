@@ -1,9 +1,10 @@
 //! Objects for Day-03
-use derive_more::{AsMut, AsRef, Constructor, Display, IntoIterator};
+use derive_more::{AsMut, AsRef, Constructor, IntoIterator};
 use itertools::Itertools;
 use once_cell::sync::Lazy;
 use regex::Regex;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
+use tracing::info;
 
 /// A simple vec of relevant info for each number
 #[derive(AsRef, AsMut, IntoIterator, Debug)]
@@ -22,7 +23,7 @@ impl NumberRegister {
                 static RE_NUMBER: Lazy<Regex> = Lazy::new(|| Regex::new(r"\d+").unwrap());
 
                 RE_NUMBER.find_iter(raw_line).for_each(|m| {
-                        let (h_start, h_end) = (m.start() as i64, m.end());
+                        let (h_start, _) = (m.start() as i64, m.end());
                         let len = m.len() as i64;
                         let val = m.as_str().parse::<u64>().expect("parse failure");
                         let start_loc = (row, h_start);
@@ -90,10 +91,11 @@ impl SpecialAdjacenciesRegister {
         pub fn register_special_adjacencies(&mut self, row: i64, raw_line: &str) {
                 // `[^.\d]` any char that's neither a literal `.` nor digit
                 // (`.` is taken literally inside brackets, vs being an almost-any char normally)
-                static RE_SPECIAL: Lazy<Regex> = Lazy::new(|| Regex::new(r"^[.\d]").unwrap());
+                static RE_SPECIAL: Lazy<Regex> = Lazy::new(|| Regex::new(r"[^.\d]").unwrap());
                 RE_SPECIAL.find_iter(raw_line).for_each(|m| {
+                        info!("m: {:?}", m);
                         let char_loc = m.start() as i64;
-                        self.calculate_adjacencies(row, char_loc);
+                        let new_adjacencies = self.calculate_adjacencies(row, char_loc);
                 });
         }
 
@@ -106,8 +108,7 @@ impl SpecialAdjacenciesRegister {
         /// WARNING: we assume row lengths to be more than one less than i64::MAX
         /// TODO: consider ways of propogating constraints -- so that guards aren't being re-checked
         /// constantly locally..
-        fn calculate_adjacencies(&mut self, row: i64, col: i64) -> Vec<(i64, i64)> {
-                let mut out = Vec::new();
+        fn calculate_adjacencies(&mut self, row: i64, col: i64) {
                 // to avoid recasting we use delta of + of our fix
                 let it_δ = (0..=2)
                         .cartesian_product(0..=2)
@@ -116,7 +117,10 @@ impl SpecialAdjacenciesRegister {
                 // // TODO: check bounds
                 // // for right now this is merely a PERF issue
                 // if r < 0 || c < 0  || r > r_max || c > c_max {
-                out
+
+                for p in it_adj {
+                        self.set.insert(p);
+                }
         }
 
         /// Checks if location as point set is in register

@@ -19,7 +19,7 @@ use tracing::info;
 /// (no vertical by horizontal crossings; no horizontal overlaps:
 /// each digit part of a single number)
 /// - ascii input
-#[tracing::instrument]
+// #[tracing::instrument]
 pub fn process(input: &str) -> Result<u64, AocErrorDay03> {
         let mut numbers = NumberRegister::new();
         let mut adjacencies = SpecialAdjacenciesRegister::new();
@@ -30,9 +30,12 @@ pub fn process(input: &str) -> Result<u64, AocErrorDay03> {
                 adjacencies.register_special_adjacencies(row as i64, raw_line);
         });
 
+        info!("numbers: {:?}", numbers);
+        info!("adjacencies: {:?}", adjacencies);
         // check what numbers are adjacent
         let mut sum = 0;
         for number in numbers {
+                info!("number: {:?}", number.val());
                 for location in number.locations() {
                         if adjacencies.contains(location) {
                                 sum += number.val();
@@ -64,21 +67,20 @@ mod tests {
                         ...$.*....
                         .664.598..
                 "};
-                let expected = 114;
+                let expected = 4361;
                 assert_eq!(process(input)?, expected);
                 Ok(())
         }
 
         /// This test's expected value is to be populated after
-        /// verification of solution.  
+        /// verification of solution.
         /// (useful for future refactors and perfs)
         /// NOTE: `#[ignore]` is set for this test by default.
-        #[ignore]
         #[test]
         fn test_process_problem_input() -> Result<()> {
                 let file_input = include_str!("../input1.txt");
-                let expected = todo!();
-                // assert_eq!(process(file_input)?, expected);
+                let expected = 535351;
+                assert_eq!(process(file_input)?, expected);
                 Ok(())
         }
 }
