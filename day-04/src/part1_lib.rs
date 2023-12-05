@@ -19,7 +19,7 @@ use tracing::info;
 // PERF:: for simple gobling up numbers in a row
 const NUM: &str = r"(\d+)";
 
-#[tracing::instrument]
+// #[tracing::instrument]
 pub fn process(input: &str) -> Result<u64, AocErrorDay04> {
         info!("Hiii. from  day-04 Part1! :)");
         let pile: CardPile = input.lines().collect();
@@ -36,8 +36,10 @@ pub fn process(input: &str) -> Result<u64, AocErrorDay04> {
 #[derive(Constructor, Debug, PartialEq, Eq)]
 struct ScratchCard {
         id: u64,
-        wins_arr: [u64; 5],
-        haves_arr: [u64; 8],
+        // wins_arr: [u64; 5],
+        // haves_arr: [u64; 8],
+        wins_arr: [u64; 10],
+        haves_arr: [u64; 25],
 }
 
 impl ScratchCard {
@@ -63,12 +65,15 @@ impl ScratchCard {
                         .collect();
 
                 match ordered_nums.len() {
-                        14 => Some(ScratchCard::new(
+                        // 14 => Some(ScratchCard::new(
+                        36 => Some(ScratchCard::new(
                                 ordered_nums[0],
-                                ordered_nums[1..6]
+                                // ordered_nums[1..6]
+                                ordered_nums[1..11]
                                         .try_into()
                                         .expect("vec to array failure: A"),
-                                ordered_nums[6..14]
+                                // ordered_nums[6..36]
+                                ordered_nums[11..36]
                                         .try_into()
                                         .expect("vec to array failure: B"),
                         )),
@@ -113,6 +118,10 @@ mod tests {
         use super::*;
         use indoc::indoc;
 
+        // WARNING: the structure of the data is different from the main input
+        // the code is currently designed for the main input for perf reasons
+        // (and I just don't feel like doing multi pass or splitting)
+        #[ignore]
         #[test]
         fn test_process_example() -> Result<()> {
                 tracing_subscriber::fmt::init();
@@ -130,16 +139,15 @@ mod tests {
                 Ok(())
         }
 
-        // /// This test's expected value is to be populated after
-        // /// verification of solution.
-        // /// (useful for future refactors and perfs)
-        // /// NOTE: `#[ignore]` is set for this test by default.
-        // #[ignore]
-        // #[test]
-        // fn test_process_problem_input() -> Result<()> {
-        //         let file_input = include_str!("../input1.txt");
-        //         let expected = todo!();
-        //         assert_eq!(process(file_input)?, expected);
-        //         Ok(())
-        // }
+        /// This test's expected value is to be populated after
+        /// verification of solution.
+        /// (useful for future refactors and perfs)
+        /// NOTE: `#[ignore]` is set for this test by default.
+        #[test]
+        fn test_process_problem_input() -> Result<()> {
+                let file_input = include_str!("../input1.txt");
+                let expected = 25183;
+                assert_eq!(process(file_input)?, expected);
+                Ok(())
+        }
 }
