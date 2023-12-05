@@ -3,11 +3,7 @@
 
 use crate::custom_error::AocErrorDay03;
 use crate::data_types::{NumberRegister, SpecialAdjacenciesRegister};
-use derive_more::{AsMut, AsRef, Constructor, Display, IntoIterator};
 use miette::Result;
-use regex::Regex;
-use std::collections::{HashMap, HashSet};
-use std::ops::Range;
 use tracing::info;
 
 /// Return sum of values adjacent to special chars
@@ -27,12 +23,14 @@ use tracing::info;
 pub fn process(input: &str) -> Result<u64, AocErrorDay03> {
         let mut numbers = NumberRegister::new();
         let mut adjacencies = SpecialAdjacenciesRegister::new();
+
         // register numbers & special chars
         input.lines().enumerate().for_each(|(row, raw_line)| {
-                numbers.register_numbers((row, rawline));
-                adjacencies.register_special_adjacencies((row, raw_line));
+                numbers.register_numbers(row as i64, raw_line);
+                adjacencies.register_special_adjacencies(row as i64, raw_line);
         });
 
+        // check what numbers are adjacent
         let mut sum = 0;
         for number in numbers {
                 for location in number.locations() {
@@ -80,7 +78,7 @@ mod tests {
         fn test_process_problem_input() -> Result<()> {
                 let file_input = include_str!("../input1.txt");
                 let expected = todo!();
-                assert_eq!(process(file_input)?, expected);
+                // assert_eq!(process(file_input)?, expected);
                 Ok(())
         }
 }
