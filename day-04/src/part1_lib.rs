@@ -2,7 +2,7 @@
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
 
 use crate::custom_error::AocErrorDay04;
-use derive_more::{AsMut, AsRef, Constructor, IntoIterator};
+use derive_more::{Constructor, IntoIterator};
 use miette::Result;
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -14,7 +14,7 @@ use tracing::info;
 // // then the borders will need to change
 // const CARD_NUM: &str = r"Card (\d+):"; // Card 1num:
 // const LEFT_NUMS: &str = r": (\d+) (\d+) (\d+) (\d+) (\d+) |"; // : 5nums |
-// const RIGHT_NUMS: &str = r"| (\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+)$"; // | 5 nums$
+// const RIGHT_NUMS: &str = r"| (\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+)$"; // | 8 nums$
 
 // PERF:: for simple gobling up numbers in a row
 const NUM: &str = r"(\d+)";
@@ -24,8 +24,11 @@ pub fn process(input: &str) -> Result<u64, AocErrorDay04> {
         info!("Hiii. from  day-04 Part1! :)");
         let pile: CardPile = input.lines().collect();
 
-        info!("------------pile: {:#?}", pile);
-        todo!()
+        Ok(pile.into_iter()
+                .map(|card| card.wining_haves_overlap())
+                .filter(|&n| n > 0)
+                .map(|n| 2u64.pow(n as u32 - 1))
+                .sum())
 }
 
 /// Represents a single scratch card.
@@ -38,6 +41,15 @@ struct ScratchCard {
 }
 
 impl ScratchCard {
+        /// Gives the number of winning nums
+        /// assumes wins_arr could be a set (i.e. ignoring non-uniqueness) while haves_arr may have
+        /// duplicates
+        fn wining_haves_overlap(&self) -> u64 {
+                self.haves_arr
+                        .iter()
+                        .filter(|&n| self.wins_arr.contains(n))
+                        .count() as u64
+        }
         /// NOTE: the multiple refernces to splits is error prone
         fn from_str(line: &str) -> Option<Self> {
                 // static RE_CARD: Lazy<Regex> = Lazy::new(|| Regex::new(CARD_NUM).unwrap());
@@ -67,14 +79,17 @@ impl ScratchCard {
 
 /// Represents a pile of (scratch) cards.
 /// (simple wrapper)
-#[derive(Debug, PartialEq, Eq)]
-struct CardPile {
-        cards: Vec<ScratchCard>,
-}
+#[derive(Debug, PartialEq, Eq, IntoIterator)]
+struct CardPile(Vec<ScratchCard>);
 
 impl CardPile {
         fn new() -> Self {
-                Self { cards: Vec::new() }
+                Self(Vec::new())
+        }
+
+        /// Gives a mutable reference to the pile's cards
+        fn cards(&mut self) -> &mut Vec<ScratchCard> {
+                &mut self.0
         }
 }
 
@@ -84,7 +99,7 @@ impl<'a> FromIterator<&'a str> for CardPile {
 
                 for item in iter {
                         match ScratchCard::from_str(item) {
-                                Some(card) => pile.cards.push(card),
+                                Some(card) => pile.cards().push(card),
                                 None => panic!("Invalid card data on line {}", item),
                         }
                 }
