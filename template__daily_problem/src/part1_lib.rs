@@ -5,7 +5,7 @@ use crate::custom_error::AocError{{project-name | upper_camel_case}};
 use miette::Result;
 
 #[tracing::instrument]
-pub fn process(_input: &str) -> Result<String, AocError{{project-name | upper_camel_case}}> {
+pub fn process(input: &str) -> Result<i64, AocError{{project-name | upper_camel_case}}> {
         todo!("{{project-name | title_case | downcase}} - part 1");
 }
 
@@ -23,16 +23,16 @@ mod tests {
                 Ok(())
         }
 
-        /// This test's expected value is to be populated after
-        /// verification of solution.  
-        /// (useful for future refactors and perfs)
-        /// NOTE: `#[ignore]` is set for this test by default.
-        #[ignore]
-        #[test]
-        fn test_process_problem_input() -> Result<()> {
-                let file_input = include_str!("../input1.txt");
-                let expected = todo!();
-                assert_eq!(process(file_input)?, expected);
-                Ok(())
-        }
+        // /// This test's expected value is to be populated after
+        // /// verification of solution.  
+        // /// (useful for future refactors and perfs)
+        // /// NOTE: `#[ignore]` is set for this test by default.
+        // #[ignore]
+        // #[test]
+        // fn test_process_problem_input() -> Result<()> {
+        //         let file_input = include_str!("../input1.txt");
+        //         let expected = todo!();
+        //         assert_eq!(process(file_input)?, expected);
+        //         Ok(())
+        // }
 }
