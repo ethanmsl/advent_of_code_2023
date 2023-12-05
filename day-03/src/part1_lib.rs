@@ -2,7 +2,7 @@
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
 
 use crate::custom_error::AocErrorDay03;
-use crate::data_types::{NumberRegister, SpecialAdjacenciesRegister};
+use crate::data_types_part1::{NumberRegister, SpecialAdjacenciesRegister};
 use miette::Result;
 use tracing::info;
 
