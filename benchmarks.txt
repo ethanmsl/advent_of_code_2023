@@ -1,7 +1,7 @@
 
-running 2 tests
-ii
-test result: ok. 0 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 0.00s
+running 4 tests
+iiii
+test result: ok. 0 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
 
 running 0 tests
@@ -14,6 +14,73 @@ running 0 tests
 test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
 day_01    fastest       │ slowest       │ median        │ mean          │ samples │ iters
-├─ part1  167.7 µs      │ 375.6 µs      │ 177.9 µs      │ 205.5 µs      │ 100     │ 100
-╰─ part2  704.7 µs      │ 1.321 ms      │ 785.4 µs      │ 845.6 µs      │ 100     │ 100
+├─ part1  129 µs        │ 320.2 µs      │ 199 µs        │ 184.5 µs      │ 100     │ 100
+╰─ part2  656.6 µs      │ 1.463 ms      │ 770.6 µs      │ 831.5 µs      │ 100     │ 100
+
+
+running 4 tests
+iiii
+test result: ok. 0 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+day_02    fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ part1  253.7 µs      │ 2.032 ms      │ 295 µs        │ 320.6 µs      │ 100     │ 100
+╰─ part2  182.1 µs      │ 534.2 µs      │ 204.7 µs      │ 209.1 µs      │ 100     │ 100
+
+
+running 4 tests
+iiii
+test result: ok. 0 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+day_03    fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ part1  588.4 µs      │ 3.504 ms      │ 719.7 µs      │ 796.1 µs      │ 100     │ 100
+╰─ part2  374.6 µs      │ 597.7 µs      │ 405.7 µs      │ 407.4 µs      │ 100     │ 100
+
+
+running 4 tests
+iiii
+test result: ok. 0 passed; 0 failed; 4 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+day_04    fastest       │ slowest       │ median        │ mean          │ samples │ iters
+├─ part1  366.4 µs      │ 2.019 ms      │ 427.8 µs      │ 480.6 µs      │ 100     │ 100
+╰─ part2  303.4 µs      │ 493.8 µs      │ 322.2 µs      │ 330.7 µs      │ 100     │ 100
 
