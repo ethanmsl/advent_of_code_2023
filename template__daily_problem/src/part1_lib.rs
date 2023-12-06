@@ -1,12 +1,13 @@
 //! Library code for Part 1 of {{ project-name | title_case }} of Advent of Code 2023.
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
+#![allow(warnings)]
 
 use crate::custom_error::AocError{{project-name | upper_camel_case}};
 use miette::Result;
 use tracing::info;
 
-#[tracing::instrument]
-pub fn process(input: &str) -> Result<i64, AocError{{project-name | upper_camel_case}}> {
+// #[tracing::instrument]
+pub fn process(_input: &str) -> Result<i64, AocError{{project-name | upper_camel_case}}> {
         info!("Hiii. from  {{ project-name | kebab_case }} Part1! :)");
         todo!("{{project-name | title_case | downcase}} - Part 1");
 }
