@@ -95,7 +95,7 @@ impl SpecialAdjacenciesRegister {
                 RE_SPECIAL.find_iter(raw_line).for_each(|m| {
                         info!("m: {:?}", m);
                         let char_loc = m.start() as i64;
-                        let new_adjacencies = self.calculate_adjacencies(row, char_loc);
+                        self.calculate_adjacencies(row, char_loc);
                 });
         }
 
