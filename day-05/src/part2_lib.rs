@@ -1,15 +1,15 @@
-//! Library code for Part 1 of {{ project-name | title_case }} of Advent of Code 2023.
-//! `bin > part1.rs` will run this code along with conent of `input1.txt`
+//! Library code for Part 2 of Day 05 of Advent of Code 2023.
+//! `bin > part2.rs` will run this code along with conent of `input2.txt`
 #![allow(warnings)]
 
-use crate::custom_error::AocError{{project-name | upper_camel_case}};
+use crate::custom_error::AocErrorDay05;
 use miette::Result;
 use tracing::info;
 
 // #[tracing::instrument]
-pub fn process(_input: &str) -> Result<i64, AocError{{project-name | upper_camel_case}}> {
-        info!("Hiii. from  {{ project-name | kebab_case }} Part1! :)");
-        todo!("{{project-name | title_case | downcase}} - Part 1");
+pub fn process(_input: &str) -> Result<i64, AocErrorDay05> {
+        info!("Hiii. from  day-05 Part2! :)");
+        todo!("day 05 - Part 2");
 }
 
 #[cfg(test)]
@@ -38,7 +38,7 @@ mod tests {
         // #[ignore]
         // #[test]
         // fn test_process_problem_input() -> Result<()> {
-        //         let file_input = include_str!("../input1.txt");
+        //         let file_input = include_str!("../input2.txt");
         //         let expected = todo!();
         //         assert_eq!(process(file_input)?, expected);
         //         Ok(())
