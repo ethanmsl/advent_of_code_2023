@@ -36,7 +36,8 @@ pub fn process(input: &str) -> Result<u64, AocErrorDay04> {
                 pile.update_copies(card_id as u64);
         }
 
-        info!("pile: {:?}", pile);
+        // info!("pile: {:?}", pile);
+        println!("fsdfsdfasdfadsfdsaf------------------");
 
         Ok(pile.cards().into_iter().map(|c| c.copies()).sum())
 }
@@ -175,6 +176,8 @@ mod tests {
         /// NOTE: `#[ignore]` is set for this test by default.
         #[test]
         fn test_process_problem_input() -> Result<()> {
+                tracing_subscriber::fmt::init();
+
                 let file_input = include_str!("../input2.txt");
                 let expected = 5667240;
                 assert_eq!(process(file_input)?, expected);
