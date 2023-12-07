@@ -6,6 +6,45 @@ use crate::custom_error::AocErrorDay05;
 use miette::Result;
 use tracing::info;
 
+// Capture Patterns for Regex generation
+const SEEDS: &str = r"seeds: (.*)$";
+const NUM: &str = r"(\d)";
+const A_TO_B: &str = r"(\w+)-to-(\w):";
+const VAL_MAP: &str = r"^(\d+) (\d+) (\d+)";
+
+/// Return lowest "seed" to "location" mapping's location value.
+/// Parse seeds, maps kinds, and value map ranges.
+///
+/// ## NOTES:
+/// - Values are approaching u32 MAX at least.
+///   - u32::MAX ==              4_294_967_295
+///   - u64::MAX == 18_446_744_073_709_551_615
+///   - sample_input_val ==      2_906_633_798
+/// - Part1 mappings appear to be ordered.
+///   - e.g. a to b, b to c, c to d
+///   - We could use a vector and skip mapping kind parsing or lookup.
+///   - alt: we could HashMap for generality
+///     - alt, alt: we could BTree to 'take the difference'
+///       - ^ probably best from general edu-spirit of the games
+///     - there's also an 'ordered-hashmap crate out there'
+///       - **EDIT**: renamed to `IndexMap`
+///
+/// ## Questions:
+/// - Use `Logos` for primitive parsing?
+///   - (good chance to work with non-shallow enums)
+///
+/// ## General Path:
+/// - Parse
+///   - first line to seeds
+///   - chunk inputs based on blank lines
+///   - parse a-to-b (not needed for part1, but still)
+///   - pars raw values into input range + offset
+/// - Just iterate through remaining
+///   - see if value is in a range
+///   - apply offset if so
+///   - continue
+/// - Return lowest when done
+
 // #[tracing::instrument]
 pub fn process(_input: &str) -> Result<i64, AocErrorDay05> {
         info!("Hiii. from  day-05 Part1! :)");
