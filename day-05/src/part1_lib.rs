@@ -3,14 +3,18 @@
 #![allow(warnings)]
 
 use crate::custom_error::AocErrorDay05;
+use core::cell::OnceCell;
+use derive_more::{Constructor, IntoIterator};
 use miette::Result;
+use once_cell::sync::Lazy;
+use regex::Regex;
 use tracing::info;
 
 // Capture Patterns for Regex generation
-const SEEDS: &str = r"seeds: (.*)$";
-const NUM: &str = r"(\d)";
-const A_TO_B: &str = r"(\w+)-to-(\w):";
-const VAL_MAP: &str = r"^(\d+) (\d+) (\d+)";
+static RE_SEEDS: Lazy<Regex> = Lazy::new(|| Regex::new(r"seeds: (.*)$").unwrap());
+static RE_NUM: Lazy<Regex> = Lazy::new(|| Regex::new(r"\d+").unwrap());
+static RE_A_TO_B: Lazy<Regex> = Lazy::new(|| Regex::new(r"(\w+)-to-(\w+):").unwrap());
+static RE_VAL_MAP: Lazy<Regex> = Lazy::new(|| Regex::new(r"^(\d+) (\d+) (\d+)").unwrap());
 
 /// Return lowest "seed" to "location" mapping's location value.
 /// Parse seeds, maps kinds, and value map ranges.
@@ -45,12 +49,60 @@ const VAL_MAP: &str = r"^(\d+) (\d+) (\d+)";
 ///   - continue
 /// - Return lowest when done
 
+/// ## Design Thoughts:
+/// A natural desire for this implementation would be an 'enum' of the map kinds.
+/// However, those are dynamically determined.  A lack of subtyping would also make a struct
+/// like "Seeds" difficult and reliant on user execution of validators, I believe.
+///
+/// On continued thought, "Seeds doesn't have much use here other than gating propogation, which
+/// isn't really a natural behavior of the maps object, nor one I would want to implement."
+/// (I suppose it is natural in the context of a vector based implementation that discards actual
+/// to from tags)
 // #[tracing::instrument]
-pub fn process(_input: &str) -> Result<i64, AocErrorDay05> {
+pub fn process(input: &str) -> Result<i64, AocErrorDay05> {
         info!("Hiii. from  day-05 Part1! :)");
+        let mut it_inp = input.lines();
+        let first_line = it_inp.next().expect("empty input");
+
+        let seeds: Vec<DynThings> = read_seeds(first_line).ok_or(AocErrorDay05::SeedsParse(
+                "Failed to parse seeds".to_string(),
+        ))?;
+        info!("seeds: {:?}", seeds);
+        // let maps: Maps = it_inp.collect();
+        //
+        // seeds.iter().map(|seed| maps.propogate_complete(seed) ).min()
+        // let seeds_w = maps.propogate_complete(seeds);
         todo!("day 05 - Part 1");
 }
 
+fn read_seeds(line: &str) -> Option<Vec<DynThings>> {
+        const SEED: &str = "seed";
+        let Some(seeds) = RE_SEEDS.captures(line) else {
+                return None;
+        };
+
+        Some(RE_NUM
+                .find_iter(line)
+                .map(|m| m.as_str().parse::<u64>().expect("parse failure"))
+                .map(|val| DynThings::new(SEED.to_string(), val))
+                .collect())
+}
+
+/// Object with dynamic 'kind' indicated by a string and a positive value.
+///
+/// PERF: there ought to be a way to write a single static string that they can all reference.
+/// Or perhaps a collection of them, they can reference from...
+/// For now, the number of items is so small that I'll just use a whole string, but this is
+/// expensive.
+#[derive(Debug, PartialEq, Eq, Constructor)]
+struct DynThings {
+        kind: String,
+        val: u64,
+}
+
+// parser
+// // seeds:
+//
 #[cfg(test)]
 mod tests {
         use super::*;
