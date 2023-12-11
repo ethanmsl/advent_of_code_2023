@@ -75,14 +75,22 @@ pub fn process(input: &str) -> Result<i64, AocErrorDay05> {
         debug!("seeds: {:?}", seeds);
 
         let maps: Vec<Map> = it_chunk.map(|chunk| Map::from_str(chunk)).collect();
-        // trace!("maps: {:?}", maps);
 
-        //
-        // seeds.iter().map(|seed| maps.propogate_complete(seed) ).min()
-        // let seeds_w = maps.propogate_complete(seeds);
-        todo!("day 05 - Part 1");
+        seeds.iter()
+                .map(|seed| {
+                        maps.iter().fold(seed.val, |mut acc, map| {
+                                let temp = map.val_only_passthrough(acc);
+                                info!(?acc, ?temp);
+                                temp
+                        })
+                })
+                .min()
+                .ok_or(AocErrorDay05::MinFailure(
+                        "Failed to find minimum after seed mapping".to_string(),
+                ))
 }
 
+/// Read a single line string and extract seed values.
 fn read_seeds(line: &str) -> Option<Vec<DynThings>> {
         const SEED: &str = "seed";
         let Some(seeds) = RE_SEEDS.captures(line) else {
@@ -157,7 +165,7 @@ impl Map {
 
                         rmaps.push(RangeBump::new(
                                 (out_start - in_start),
-                                (in_start..in_start + length),
+                                (in_start..(in_start + length)),
                         ));
                 });
 
@@ -187,6 +195,7 @@ impl RangeBump {
         /// Returns true if the given value is in the range.
         /// If so, the offset is applied to the value.
         fn try_bump(&self, val: i64) -> Option<i64> {
+                debug!(?val, ?self);
                 if self.range.contains(&val) {
                         Some(val + self.offset)
                 } else {

@@ -12,4 +12,8 @@ pub enum AocErrorDay05 {
         #[error("Error parsing seeds: {0}")]
         #[diagnostic(code(aoc::seeds_parse_error))]
         SeedsParse(String),
+
+        #[error("Error parsing seeds: {0}")]
+        #[diagnostic(code(aoc::min_unwrap_error))]
+        MinFailure(String),
 }
