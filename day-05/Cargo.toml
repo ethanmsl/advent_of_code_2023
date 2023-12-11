@@ -31,6 +31,7 @@ divan = { workspace = true }
 # tracy-client-sys = { workspace = true }
 # Testing
 test-case = { workspace = true }
+once_cell.workspace = true
 
 [dev-dependencies]
 divan = { workspace = true }
