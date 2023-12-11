@@ -1,11 +1,8 @@
 //! Library code for Part 1 of Day 05 of Advent of Code 2023.
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
-#![allow(warnings)]
 
 use crate::custom_error::AocErrorDay05;
-use core::cell::OnceCell;
-use derive_more::{Constructor, IntoIterator};
-use itertools::Itertools;
+use derive_more::Constructor;
 use miette::Result;
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -74,11 +71,11 @@ pub fn process(input: &str) -> Result<i64, AocErrorDay05> {
         ))?;
         debug!("seeds: {:?}", seeds);
 
-        let maps: Vec<Map> = it_chunk.map(|chunk| Map::from_str(chunk)).collect();
+        let maps: Vec<Map> = it_chunk.map(Map::from_str).collect();
 
         seeds.iter()
                 .map(|seed| {
-                        maps.iter().fold(seed.val, |mut acc, map| {
+                        maps.iter().fold(seed.val, |acc, map| {
                                 let temp = map.val_only_passthrough(acc);
                                 info!(?acc, ?temp);
                                 temp
@@ -93,7 +90,7 @@ pub fn process(input: &str) -> Result<i64, AocErrorDay05> {
 /// Read a single line string and extract seed values.
 fn read_seeds(line: &str) -> Option<Vec<DynThings>> {
         const SEED: &str = "seed";
-        let Some(seeds) = RE_SEEDS.captures(line) else {
+        let Some(_) = RE_SEEDS.captures(line) else {
                 return None;
         };
 
@@ -164,8 +161,8 @@ impl Map {
                                 .expect("length parse failure");
 
                         rmaps.push(RangeBump::new(
-                                (out_start - in_start),
-                                (in_start..(in_start + length)),
+                                out_start - in_start,
+                                in_start..(in_start + length),
                         ));
                 });
 
