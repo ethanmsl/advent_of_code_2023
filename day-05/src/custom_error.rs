@@ -8,4 +8,8 @@ pub enum AocErrorDay05 {
         #[error(transparent)]
         #[diagnostic(code(aoc::io_error))]
         IoError(#[from] std::io::Error),
+
+        #[error("Error parsing seeds: {0}")]
+        #[diagnostic(code(aoc::seeds_parse_error))]
+        SeedsParse(String),
 }
