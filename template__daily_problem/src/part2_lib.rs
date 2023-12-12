@@ -3,12 +3,14 @@
 #![allow(warnings)]
 
 use crate::custom_error::AocError{{project-name | upper_camel_case}};
+use anyhow::Result;
 use derive_more::Constructor;
-use miette::Result;
+use logos::{Lexer, Logos};
 use once_cell::sync::Lazy;
 use rayon::prelude::*;
 use regex::Regex;
-use tracing::{debug, info, trace};
+use tracing::{event, Level};
+// use miette::Result;
 
 // #[tracing::instrument]
 pub fn process(_input: &str) -> Result<i64, AocError{{project-name | upper_camel_case}}> {
