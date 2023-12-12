@@ -1,11 +1,5 @@
 use anyhow::Result;
-use anyhow::Result;
-use derive_more::Constructor;
 use logos::{Lexer, Logos};
-use logos::{Lexer, Logos};
-use once_cell::sync::Lazy;
-use rayon::prelude::*;
-use regex::Regex;
 use tracing::{event, Level};
 
 // Note: callbacks can return `Option` or `Result`
@@ -46,9 +40,9 @@ fn main() -> Result<()> {
         event!(Level::DEBUG, "starting");
         event!(Level::TRACE, "starting");
 
-        let mut lex = Token::lexer("5 42k 75m");
+        let lex = Token::lexer("5 42k 75m");
 
-        for tok in &mut lex.spanned() {
+        for tok in lex.spanned() {
                 println!("{:?}", tok);
         }
         Ok(())
