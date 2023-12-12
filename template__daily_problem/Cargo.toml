@@ -20,6 +20,7 @@ tracing-subscriber = { workspace = true }
 # Math
 # ...
 # Parsing
+logos = { workspace = true }
 regex = { workspace = true }
 regex-automata = { workspace = true }
 # Performance
