@@ -3,25 +3,56 @@
 #![allow(warnings)]
 
 use crate::custom_error::AocErrorDay07;
+use crate::lexer::Tokens;
 use anyhow::Result;
 use derive_more::Constructor;
-use logos::{Lexer, Logos};
 use once_cell::sync::Lazy;
 use rayon::prelude::*;
 use regex::Regex;
 use tracing::{event, Level};
 // use miette::Result;
 
-#[derive(Logos, Debug, PartialEq)]
-enum Tokens {
-        #[regex(r"[ \n]+", logos::skip)]
-        Ignored,
+/// Card Types
+/// note: derived order is asscending from top to bottom as written.
+///       (e.g. here, c2 < c3 < c4 < ... < cA)
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+enum Card {
+        c2,
+        c3,
+        c4,
+        c5,
+        c6,
+        c7,
+        c8,
+        c9,
+        cT,
+        cJ,
+        cQ,
+        cK,
+        cA,
+}
 
-        #[regex(r"\w{5}", |lex| Some(['1'; 5]))]
-        Hand([char; 5]),
+/// Hand Types
+/// note: derived order is asscending from top to bottom as written.
+///       (e.g. here, c2 < c3 < c4 < ... < cA)
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+enum HType {
+        h____1,
+        h___22,
+        h_2222,
+        h__333,
+        h22333,
+        h_4444,
+        h55555,
+}
 
-        #[regex(r"[0-9]+", |lex| lex.slice().parse::<u64>().expect("parse failure"))]
-        Bid(u64),
+/// Hand of specific cars, with htype and a bid.
+/// (ranking not specified, expected to be inferred from context)
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+struct Hand {
+        cards: [Card; 5],
+        htype: HType,
+        bid: u64,
 }
 
 // #[tracing::instrument]
