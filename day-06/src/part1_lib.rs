@@ -8,6 +8,7 @@ use miette::Result;
 use once_cell::sync::Lazy;
 use rayon::prelude::*;
 use regex::Regex;
+use std::ops::RangeInclusive;
 use tracing::{debug, info, trace};
 
 // #[tracing::instrument]
@@ -25,14 +26,65 @@ use tracing::{debug, info, trace};
 ///   - Biggest input number is 94, and max search is less than half of that. (if we assume all are
 ///   winnable)
 /// - We can do some algebra and just solve a quadratic equation. (e.g. -9 + 7x x^2 == 0)
+///  - ( -dist + time *x - x^2 )
 ///
 /// Given that we're a bit behidn brute force is probably simplest given the nature of the problem.
 /// Or we could just look up the quatdratic solution formula -- lol :
 ///   - `x = (-b +/- sqrt(b^2 - 4ac)) / 2a`
 ///
-pub fn process(_input: &str) -> Result<i64, AocErrorDay06> {
+pub fn process(input: &str) -> Result<usize, AocErrorDay06> {
         info!("Hiii. from  day-06 Part1! :)");
-        todo!("day 06 - Part 1");
+        let stats: Vec<GameStats> = input_to_games(input);
+
+        let prod = stats
+                .iter()
+                .map(|s| {
+                        let lb = lower_bound_solution(s.max_time, s.record_dist);
+                        lb_to_count(s.max_time, lb)
+                })
+                .product();
+        Ok(prod)
+}
+
+fn input_to_games(inp: &str) -> Vec<GameStats> {
+        todo!()
+}
+
+/// Game's allowed time and best record distance.
+#[derive(Debug, Constructor)]
+struct GameStats {
+        max_time: u64,
+        record_dist: u64,
+}
+
+/// Takes lower_bound and max_time and returns the inner count of whole integers
+fn lb_to_count(max_time: u64, lb: u64) -> usize {
+        (lb..(max_time - lb)).count()
+}
+
+///   Smallest solution to get the record boat score.
+///   (Lower bound of winning numbers, with a mirroring upper bound)
+///   
+///   `x = (-b +/- sqrt(b^2 - 4ac)) / 2a`
+///   `a x^2 + b x + c = 0`
+fn lower_bound_solution(max_time: u64, record_dist: u64) -> u64 {
+        let c_0 = -1.0 * record_dist as f64;
+        let b_1 = max_time as f64;
+        const a_2: f64 = -1.0;
+        // problem requires two (pos) solutions to this to be winnable.
+        // we can use the fact that that correspond to a discriminant > 0 to create a guard.
+        if c_0 * a_2 >= b_1.powi(2) {
+                if c_0 * a_2 == b_1.powi(2) {
+                        panic!("Perfect, unbeatable score!")
+                }
+                panic!("Nonsense, impossible score!");
+        }
+
+        let discriminant = b_1.powi(2) - 4.0 * a_2 * c_0;
+        let x_min = (-b_1 + discriminant.sqrt()) / (2.0 * a_2);
+        // let x_max = (-b_1 - discriminant.sqrt()) / (2.0 * a_0);
+        // (x_min.ceil() as i32..=(x_max.floor() as i32))
+        x_min.ceil() as u64
 }
 
 #[cfg(test)]
