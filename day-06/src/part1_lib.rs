@@ -1,14 +1,13 @@
 //! Library code for Part 1 of Day 06 of Advent of Code 2023.
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
-#![allow(warnings)]
 
 use crate::custom_error::AocErrorDay06;
 use anyhow::Result;
 use derive_more::Constructor;
 use once_cell::sync::Lazy;
-use rayon::prelude::*;
+// use rayon::prelude::*;
 use regex::Regex;
-use std::ops::RangeInclusive;
+// use std::ops::RangeInclusive;
 use tracing::{debug, info, trace};
 
 static RE_TIME: Lazy<Regex> = Lazy::new(|| Regex::new(r"Time: (?<time>.*)$").unwrap());
@@ -37,11 +36,7 @@ static RE_NUM: Lazy<Regex> = Lazy::new(|| Regex::new(r"\d+").unwrap());
 ///   - `x = (-b +/- sqrt(b^2 - 4ac)) / 2a`
 ///
 pub fn process(input: &str) -> Result<usize> {
-        let lb = lower_bound_solution(30, 200);
-        info!("fasfladsfadsfa");
-        info!("Hiii. from  day-06 Part1! :)");
         let stats: Vec<GameStats> = input_to_games(input)?;
-        info!("Stats: {:#?}", stats);
 
         Ok(stats.iter()
                 .map(|s| {
@@ -57,7 +52,7 @@ fn input_to_games(inp: &str) -> Result<Vec<GameStats>> {
         let mut lines = inp.lines();
         let line = lines.next().expect("missing line 1");
         let Some(_) = RE_TIME.captures(line) else {
-                return Err(AocErrorDay06::ParseError("Missing Time Line".to_string()))?;
+                Err(AocErrorDay06::ParseError("Missing Time Line".to_string()))?
         };
         let times: Vec<_> = RE_NUM
                 .find_iter(line)
@@ -66,14 +61,14 @@ fn input_to_games(inp: &str) -> Result<Vec<GameStats>> {
 
         let line = lines.next().expect("missing line 2");
         let Some(_) = RE_DIST.captures(line) else {
-                return Err(AocErrorDay06::ParseError("Missing Dist. Line".to_string()))?;
+                Err(AocErrorDay06::ParseError("Missing Dist. Line".to_string()))?
         };
         let dists: Vec<_> = RE_NUM
                 .find_iter(line)
                 .map(|m| m.as_str().parse::<i64>().expect("parse failure"))
                 .collect();
         Ok(times.into_iter()
-                .zip(dists.into_iter())
+                .zip(dists)
                 .map(|(t, d)| GameStats::new(t as u64, d as u64))
                 .collect())
 }
@@ -98,18 +93,18 @@ fn lb_to_count(max_time: u64, lb: u64) -> usize {
 fn lower_bound_solution(max_time: u64, record_dist: u64) -> u64 {
         let c_0 = -1.0 * record_dist as f64;
         let b_1 = max_time as f64;
-        const a_2: f64 = -1.0;
+        const A_2: f64 = -1.0;
         // problem requires two (pos) solutions to this to be winnable.
         // we can use the fact that that correspond to a discriminant > 0 to create a guard.
-        if c_0 * a_2 >= b_1.powi(2) {
-                if c_0 * a_2 == b_1.powi(2) {
+        if c_0 * A_2 >= b_1.powi(2) {
+                if c_0 * A_2 == b_1.powi(2) {
                         panic!("Perfect, unbeatable score!")
                 }
                 panic!("Nonsense, impossible score!");
         }
 
-        let discriminant = b_1.powi(2) - 4.0 * a_2 * c_0;
-        let x_min = (-b_1 + discriminant.sqrt()) / (2.0 * a_2);
+        let discriminant = b_1.powi(2) - 4.0 * A_2 * c_0;
+        let x_min = (-b_1 + discriminant.sqrt()) / (2.0 * A_2);
 
         let ceil = x_min.ceil() as u64;
         trace!("{} -> {}", record_dist, (max_time - ceil) * ceil);
@@ -138,16 +133,16 @@ mod tests {
                 Ok(())
         }
 
-        // /// This test's expected value is to be populated after
-        // /// verification of solution.
-        // /// (useful for future refactors and perfs)
-        // /// NOTE: `#[ignore]` is set for this test by default.
+        /// This test's expected value is to be populated after
+        /// verification of solution.
+        /// (useful for future refactors and perfs)
+        /// NOTE: `#[ignore]` is set for this test by default.
         // #[ignore]
-        // #[test]
-        // fn test_process_problem_input() -> Result<()> {
-        //         let file_input = include_str!("../input1.txt");
-        //         let expected = todo!();
-        //         assert_eq!(process(file_input)?, expected);
-        //         Ok(())
-        // }
+        #[test]
+        fn test_process_problem_input() -> Result<()> {
+                let file_input = include_str!("../input1.txt");
+                let expected = 345015;
+                assert_eq!(process(file_input)?, expected);
+                Ok(())
+        }
 }
