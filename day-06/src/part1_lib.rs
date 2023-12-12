@@ -11,6 +11,10 @@ use regex::Regex;
 use std::ops::RangeInclusive;
 use tracing::{debug, info, trace};
 
+static RE_TIME: Lazy<Regex> = Lazy::new(|| Regex::new(r"Time: (?<time>.*)$").unwrap());
+static RE_DIST: Lazy<Regex> = Lazy::new(|| Regex::new(r"Distance: (?<dist>.*)$").unwrap());
+static RE_NUM: Lazy<Regex> = Lazy::new(|| Regex::new(r"\d+").unwrap());
+
 // #[tracing::instrument]
 /// Return all integer pairs less oblong than those of 'record' labelled by "Distance".
 ///
@@ -33,22 +37,20 @@ use tracing::{debug, info, trace};
 ///   - `x = (-b +/- sqrt(b^2 - 4ac)) / 2a`
 ///
 pub fn process(input: &str) -> Result<usize> {
+        let lb = lower_bound_solution(30, 200);
+        info!(lb);
         info!("Hiii. from  day-06 Part1! :)");
         let stats: Vec<GameStats> = input_to_games(input)?;
+        info!("Stats: {:#?}", stats);
 
-        let prod = stats
-                .iter()
+        Ok(stats.iter()
                 .map(|s| {
                         let lb = lower_bound_solution(s.max_time, s.record_dist);
                         lb_to_count(s.max_time, lb)
                 })
-                .product();
-        Ok(prod)
+                .inspect(|c| info!("Count: {}", c))
+                .product())
 }
-
-static RE_TIME: Lazy<Regex> = Lazy::new(|| Regex::new(r"Time: (?<time>.*)$").unwrap());
-static RE_DIST: Lazy<Regex> = Lazy::new(|| Regex::new(r"Distance: (?<dist>.*)$").unwrap());
-static RE_NUM: Lazy<Regex> = Lazy::new(|| Regex::new(r"\d+").unwrap());
 
 /// Hard coding input.
 fn input_to_games(inp: &str) -> Result<Vec<GameStats>> {
@@ -85,7 +87,7 @@ struct GameStats {
 
 /// Takes lower_bound and max_time and returns the inner count of whole integers
 fn lb_to_count(max_time: u64, lb: u64) -> usize {
-        (lb..(max_time - lb)).count()
+        (lb..=(max_time - lb)).count()
 }
 
 ///   Smallest solution to get the record boat score.
