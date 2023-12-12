@@ -3,8 +3,8 @@
 #![allow(warnings)]
 
 use crate::custom_error::AocErrorDay06;
+use anyhow::Result;
 use derive_more::Constructor;
-use miette::Result;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use tracing::{debug, info, trace};
@@ -35,7 +35,7 @@ mod tests {
         }
 
         // /// This test's expected value is to be populated after
-        // /// verification of solution.  
+        // /// verification of solution.
         // /// (useful for future refactors and perfs)
         // /// NOTE: `#[ignore]` is set for this test by default.
         // #[ignore]
