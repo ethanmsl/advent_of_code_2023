@@ -6,6 +6,7 @@ use crate::custom_error::AocError{{project-name | upper_camel_case}};
 use derive_more::Constructor;
 use miette::Result;
 use once_cell::sync::Lazy;
+use rayon::prelude::*;
 use regex::Regex;
 use tracing::{debug, info, trace};
 

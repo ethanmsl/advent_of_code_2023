@@ -22,7 +22,8 @@ tracing-subscriber = { workspace = true }
 regex = { workspace = true }
 regex-automata = { workspace = true }
 # Performance
-# ...
+once_cell = { workspace = true }
+rayon = { workspace = true }
 # Profiling
 dhat = { workspace = true }
 divan = { workspace = true }
