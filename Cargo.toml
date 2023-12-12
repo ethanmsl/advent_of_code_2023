@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["day-*"]
+members = ["day-*", "exploratorium"]
 
 [workspace.dependencies]
 # Error handling
@@ -21,6 +21,7 @@ nalgebra = "0.32.3"
 petgraph = "0.6.4"
 rand = "0.8.5"
 # Parsing
+logos = "0.13.0"
 nom = "7.1.3"
 regex = "1.10.2"
 regex-automata = "0.4.3"
