@@ -17,9 +17,9 @@ lint day_digits:
     cargo clippy -p day-{{day_digits}}
 
 # uses novel `cargo nextest` and a separate docs test
-test day_digits part_digit:
-    cargo nextest run -p day-{{day_digits}} part{{part_digit}}
-    cargo test -p day-{{day_digits}} --doc
+test day_digits part_digit +LEVEL="debug":
+    RUST_LOG={{LEVEL}} cargo nextest run -p day-{{day_digits}} part{{part_digit}}
+    RUST_LOG={{LEVEL}} cargo test -p day-{{day_digits}} --doc
 
 # uses traditional `cargo test`
 test-trad day_digits part_digit:

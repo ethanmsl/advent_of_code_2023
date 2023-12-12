@@ -38,7 +38,7 @@ static RE_NUM: Lazy<Regex> = Lazy::new(|| Regex::new(r"\d+").unwrap());
 ///
 pub fn process(input: &str) -> Result<usize> {
         let lb = lower_bound_solution(30, 200);
-        info!(lb);
+        info!("fasfladsfadsfa");
         info!("Hiii. from  day-06 Part1! :)");
         let stats: Vec<GameStats> = input_to_games(input)?;
         info!("Stats: {:#?}", stats);
@@ -110,9 +110,14 @@ fn lower_bound_solution(max_time: u64, record_dist: u64) -> u64 {
 
         let discriminant = b_1.powi(2) - 4.0 * a_2 * c_0;
         let x_min = (-b_1 + discriminant.sqrt()) / (2.0 * a_2);
-        // let x_max = (-b_1 - discriminant.sqrt()) / (2.0 * a_0);
-        // (x_min.ceil() as i32..=(x_max.floor() as i32))
-        x_min.ceil() as u64
+
+        let ceil = x_min.ceil() as u64;
+        trace!("{} -> {}", record_dist, (max_time - ceil) * ceil);
+        if ((max_time - ceil) * ceil) == record_dist {
+                debug!("{} -> {}", record_dist, (max_time - ceil) * ceil);
+                return ceil + 1;
+        }
+        ceil
 }
 
 #[cfg(test)]
