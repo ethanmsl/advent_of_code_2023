@@ -28,10 +28,10 @@ test-trad day_digits part_digit:
 # test part_digit +FLAGS='-p day-01':
 #     cargo nextest run {{FLAGS}} part{{part_digit}}
 bench-all:
-    cargo bench -q > benchmarks.txt
+    cargo bench --quiet > benchmarks.txt
 
 bench day_digits part_digit:
-    cargo bench --bench day-{{day_digits}} partpart{{part_digit}} >> day-{{day_digits}}.bench.txt
+    cargo bench --bench day-{{day_digits}} part{{part_digit}} >> bench_day-{{day_digits}}_part{{part_digit}}.bench.txt
 
 # TODO: fix writing
 flamegraph day_digits part_digit:
