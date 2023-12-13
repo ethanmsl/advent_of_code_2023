@@ -1,6 +1,5 @@
 //! Library code for Part 2 of Day 07 of Advent of Code 2023.
 //! `bin > part2.rs` will run this code along with conent of `input2.txt`
-#![allow(warnings)]
 
 // use crate::custom_error::AocErrorDay07;
 use crate::lexer_2::{Card, Token};
@@ -44,13 +43,21 @@ impl HType {
                 let mut counts: Vec<u8> = fmap.into_values().collect();
                 counts.sort();
                 if let Some(j_count) = j_count {
-                        event!(Level::INFO, "enter {:?}", counts);
-                        let mut mb_highest = counts.last_mut();
+                        event!(
+                                Level::INFO,
+                                "(called from parallelized routine) enter {:?}",
+                                counts
+                        );
+                        let mb_highest = counts.last_mut();
                         match mb_highest {
                                 Some(highest) => *highest += j_count,
                                 None => counts.push(j_count), // in case there were only Js
                         }
-                        event!(Level::WARN, "exit {:?}", counts);
+                        event!(
+                                Level::WARN,
+                                "(called from parallelized routine) exit {:?}",
+                                counts
+                        );
                 }
                 match counts.as_slice() {
                         [_, _, _, _, _] => Some(HType::H____1),
@@ -138,16 +145,16 @@ mod tests {
                 Ok(())
         }
 
-        // /// This test's expected value is to be populated after
-        // /// verification of solution.
-        // /// (useful for future refactors and perfs)
-        // /// NOTE: `#[ignore]` is set for this test by default.
+        /// This test's expected value is to be populated after
+        /// verification of solution.
+        /// (useful for future refactors and perfs)
+        /// NOTE: `#[ignore]` is set for this test by default.
         // #[ignore]
-        // #[test]
-        // fn test_process_problem_input() -> Result<()> {
-        //         let file_input = include_str!("../input2.txt");
-        //         let expected = todo!();
-        //         assert_eq!(process(file_input)?, expected);
-        //         Ok(())
-        // }
+        #[test]
+        fn test_process_problem_input() -> Result<()> {
+                let file_input = include_str!("../input2.txt");
+                let expected = 251195607;
+                assert_eq!(process(file_input)?, expected);
+                Ok(())
+        }
 }
