@@ -27,16 +27,24 @@ test-trad day_digits part_digit:
 
 # test part_digit +FLAGS='-p day-01':
 #     cargo nextest run {{FLAGS}} part{{part_digit}}
+
+# Bench-all days and parts.
 bench-all:
     cargo bench --quiet > benchmarks.txt
 
+# Quick bench a specific day & part.
 bench day_digits part_digit:
-    cargo bench --bench day-{{day_digits}} part{{part_digit}} >> bench_day-{{day_digits}}_part{{part_digit}}.bench.txt
+    cargo bench --bench day-{{day_digits}} part{{part_digit}} >> day-{{day_digits}}_{{part_digit}}.bench.txt
+
+# Clean up individual bench.txt files in root.
+clean-benches:
+    rm day-*_*.bench.txt
 
 # TODO: fix writing
 flamegraph day_digits part_digit:
     cargo flamegraph --profile flamegraph --root --package day-{{day_digits}} --bin part{{part_digit}} -o flamegraphs/day-{{day_digits}}--part{{part_digit}}.svg
 
+# Heap profiling of specific day & part.
 dhat day_digits part_digit:
     cargo run --profile dhat --features dhat-heap --package day-{{day_digits}} --bin part{{part_digit}}
 
