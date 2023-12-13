@@ -3,65 +3,56 @@
 #![allow(warnings)]
 
 use crate::custom_error::AocErrorDay07;
-use crate::lexer::Tokens;
+use crate::lexer::{Card, Token};
 use anyhow::Result;
 use derive_more::Constructor;
+use itertools::Itertools;
+use logos::Logos;
 use once_cell::sync::Lazy;
 use rayon::prelude::*;
 use regex::Regex;
 use tracing::{event, Level};
 // use miette::Result;
 
-/// Card Types
-/// note: derived order is asscending from top to bottom as written.
-///       (e.g. here, c2 < c3 < c4 < ... < cA)
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-enum Card {
-        c2,
-        c3,
-        c4,
-        c5,
-        c6,
-        c7,
-        c8,
-        c9,
-        cT,
-        cJ,
-        cQ,
-        cK,
-        cA,
-}
-
 /// Hand Types
 /// note: derived order is asscending from top to bottom as written.
 ///       (e.g. here, c2 < c3 < c4 < ... < cA)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 enum HType {
-        h____1,
-        h___22,
-        h_2222,
-        h__333,
-        h22333,
-        h_4444,
-        h55555,
+        H____1,
+        H___22,
+        H_2222,
+        H__333,
+        H22333,
+        H_4444,
+        H55555,
 }
 
 /// Hand of specific cars, with htype and a bid.
 /// (ranking not specified, expected to be inferred from context)
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Constructor, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct Hand {
         cards: [Card; 5],
-        htype: HType,
+        htype: Option<HType>,
         bid: u64,
 }
 
 // #[tracing::instrument]
-pub fn process(input: &str) -> Result<u64, AocErrorDay07> {
+pub fn process(input: &str) -> Result<u64> {
         event!(Level::INFO, "Hiii. from  day-07 Part1! :)");
-        let tokens = Tokens::lexer(input);
-        for tok in tokens.spanned() {
-                event!(Level::WARN, "\n{:?}", tok);
-        }
+        let hands: Vec<Hand> = Token::lexer(input)
+                .spanned()
+                .filter_map(|(t, s)| t.ok())
+                .chunks(2)
+                .into_iter()
+                .map(|mut chunk| {
+                        let hand = chunk.next().unwrap();
+                        let bid = chunk.next().unwrap();
+                        Hand::new(hand.unwrap_proto_hand(), None, bid.unwrap_bid())
+                })
+                .inspect(|h| event!(Level::INFO, "Hand: {:?}", h))
+                .collect();
+
         todo!("day 07 - Part 1");
 }
 

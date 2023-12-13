@@ -1,8 +1,9 @@
 //! Part 1 of Day 07 of Advent of Code 2023.
 //! Runs `part1_lib.rs` library code against `input1.txt`
 
+use anyhow::{Context, Result};
 use day_07::part1_lib::process;
-use miette::{Context, Result};
+// use miette::{Context, Result};
 
 #[cfg(feature = "dhat-heap")]
 #[global_allocator]
