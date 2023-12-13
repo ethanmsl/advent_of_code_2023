@@ -1,16 +1,15 @@
 //! Library code for Part 1 of Day 07 of Advent of Code 2023.
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
-#![allow(warnings)]
 
-use crate::custom_error::AocErrorDay07;
+// use crate::custom_error::AocErrorDay07;
 use crate::lexer::{Card, Token};
 use anyhow::Result;
 use derive_more::Constructor;
 use itertools::Itertools;
 use logos::Logos;
-use once_cell::sync::Lazy;
+// use once_cell::sync::Lazy;
 use rayon::prelude::*;
-use regex::Regex;
+// use regex::Regex;
 use std::collections::HashMap;
 use tracing::{event, Level};
 // use miette::Result;
@@ -18,6 +17,7 @@ use tracing::{event, Level};
 /// Hand Types
 /// note: derived order is asscending from top to bottom as written.
 ///       (e.g. here, c2 < c3 < c4 < ... < cA)
+#[allow(non_camel_case_types)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 enum HType {
         H____1,
@@ -35,7 +35,7 @@ impl HType {
                         let count = fmap.entry(*card).or_insert(0);
                         *count += 1;
                 }
-                let mut counts: Vec<u8> = fmap.values().map(|v| *v).collect();
+                let mut counts: Vec<u8> = fmap.into_values().collect();
                 counts.sort();
                 match counts.as_slice() {
                         [_, _, _, _, _] => Some(HType::H____1),
@@ -76,7 +76,7 @@ pub fn process(input: &str) -> Result<u64> {
         event!(Level::INFO, "Hiii. from  day-07 Part1! :)");
         let mut hands: Vec<Hand> = Token::lexer(input)
                 .spanned()
-                .filter_map(|(t, s)| t.ok())
+                .filter_map(|(t, _)| t.ok())
                 .chunks(2)
                 .into_iter()
                 .map(|mut chunk| {
@@ -87,7 +87,7 @@ pub fn process(input: &str) -> Result<u64> {
                 .inspect(|h| event!(Level::TRACE, "Hand: {:?}", h))
                 .collect();
 
-        hands.par_iter_mut().for_each(|mut h| {
+        hands.par_iter_mut().for_each(|h| {
                 (*h).determine_htype();
                 event!(Level::TRACE, "Hand: {:?}", h);
         });
@@ -123,16 +123,16 @@ mod tests {
                 Ok(())
         }
 
-        // /// This test's expected value is to be populated after
-        // /// verification of solution.
-        // /// (useful for future refactors and perfs)
-        // /// NOTE: `#[ignore]` is set for this test by default.
+        /// This test's expected value is to be populated after
+        /// verification of solution.
+        /// (useful for future refactors and perfs)
+        /// NOTE: `#[ignore]` is set for this test by default.
         // #[ignore]
-        // #[test]
-        // fn test_process_problem_input() -> Result<()> {
-        //         let file_input = include_str!("../input1.txt");
-        //         let expected = todo!();
-        //         assert_eq!(process(file_input)?, expected);
-        //         Ok(())
-        // }
+        #[test]
+        fn test_process_problem_input() -> Result<()> {
+                let file_input = include_str!("../input1.txt");
+                let expected = 248836197;
+                assert_eq!(process(file_input)?, expected);
+                Ok(())
+        }
 }
