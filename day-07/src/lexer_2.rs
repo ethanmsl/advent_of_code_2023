@@ -32,6 +32,7 @@ pub enum Token {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Card {
         INIT,
+        CJ,
         C2,
         C3,
         C4,
@@ -41,7 +42,6 @@ pub enum Card {
         C8,
         C9,
         CT,
-        CJ,
         CQ,
         CK,
         CA,
