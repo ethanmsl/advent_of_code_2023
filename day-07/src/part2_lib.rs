@@ -30,14 +30,28 @@ enum HType {
         H55555,
 }
 impl HType {
+        #[tracing::instrument]
         fn from_hand(hand: &Hand) -> Option<HType> {
+                // frequency map of cards
                 let mut fmap = HashMap::<Card, u8>::new();
                 for card in hand.cards.iter() {
                         let count = fmap.entry(*card).or_insert(0);
                         *count += 1;
                 }
+
+                // remove 'J's
+                let j_count = fmap.remove_entry(&Card::CJ).map(|(_, v)| v);
                 let mut counts: Vec<u8> = fmap.into_values().collect();
                 counts.sort();
+                if let Some(j_count) = j_count {
+                        event!(Level::INFO, "enter {:?}", counts);
+                        let mut mb_highest = counts.last_mut();
+                        match mb_highest {
+                                Some(highest) => *highest += j_count,
+                                None => counts.push(j_count), // in case there were only Js
+                        }
+                        event!(Level::WARN, "exit {:?}", counts);
+                }
                 match counts.as_slice() {
                         [_, _, _, _, _] => Some(HType::H____1),
                         [_, _, _, _] => Some(HType::H___22),
