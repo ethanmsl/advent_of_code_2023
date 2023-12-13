@@ -11,6 +11,7 @@ use logos::Logos;
 use once_cell::sync::Lazy;
 use rayon::prelude::*;
 use regex::Regex;
+use std::collections::HashMap;
 use tracing::{event, Level};
 // use miette::Result;
 
@@ -27,20 +28,53 @@ enum HType {
         H_4444,
         H55555,
 }
+impl HType {
+        fn from_hand(hand: &Hand) -> Option<HType> {
+                let mut fmap = HashMap::<Card, u8>::new();
+                for card in hand.cards.iter() {
+                        let count = fmap.entry(*card).or_insert(0);
+                        *count += 1;
+                }
+                let mut counts: Vec<u8> = fmap.values().map(|v| *v).collect();
+                counts.sort();
+                match counts.as_slice() {
+                        [_, _, _, _, _] => Some(HType::H____1),
+                        [_, _, _, _] => Some(HType::H___22),
+                        [_, 2, _] => Some(HType::H_2222),
+                        [_, _, 3] => Some(HType::H__333),
+                        [_, 3] => Some(HType::H22333),
+                        [_, 4] => Some(HType::H_4444),
+                        [_] => Some(HType::H55555),
+                        _ => panic!("unhandalable hand: {:?}", hand),
+                }
+        }
+}
 
 /// Hand of specific cars, with htype and a bid.
 /// (ranking not specified, expected to be inferred from context)
+/// Ord is derivable with dictionary ordering from top to bottom as written.
+/// NOTE: this is a bit the opposite of Enums, where lower is higher
+///       here higher is higher.  ...that's quite unfortunate.
 #[derive(Constructor, Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct Hand {
-        cards: [Card; 5],
         htype: Option<HType>,
+        cards: [Card; 5],
         bid: u64,
+}
+impl Hand {
+        /// Sets hand's htype if not already set.
+        fn determine_htype(&mut self) {
+                if self.htype.is_some() {
+                        return;
+                }
+                self.htype = HType::from_hand(self);
+        }
 }
 
 // #[tracing::instrument]
 pub fn process(input: &str) -> Result<u64> {
         event!(Level::INFO, "Hiii. from  day-07 Part1! :)");
-        let hands: Vec<Hand> = Token::lexer(input)
+        let mut hands: Vec<Hand> = Token::lexer(input)
                 .spanned()
                 .filter_map(|(t, s)| t.ok())
                 .chunks(2)
@@ -48,12 +82,24 @@ pub fn process(input: &str) -> Result<u64> {
                 .map(|mut chunk| {
                         let hand = chunk.next().unwrap();
                         let bid = chunk.next().unwrap();
-                        Hand::new(hand.unwrap_proto_hand(), None, bid.unwrap_bid())
+                        Hand::new(None, hand.unwrap_proto_hand(), bid.unwrap_bid())
                 })
-                .inspect(|h| event!(Level::INFO, "Hand: {:?}", h))
+                .inspect(|h| event!(Level::TRACE, "Hand: {:?}", h))
                 .collect();
 
-        todo!("day 07 - Part 1");
+        hands.par_iter_mut().for_each(|mut h| {
+                (*h).determine_htype();
+                event!(Level::TRACE, "Hand: {:?}", h);
+        });
+        event!(Level::TRACE, "Hands: {:?}", hands);
+        // using stable sort just in case...
+        hands.sort();
+        event!(Level::DEBUG, "Hands: {:?}", hands);
+
+        Ok(hands.par_iter()
+                .enumerate()
+                .map(|(id, h)| h.bid * (id as u64 + 1))
+                .sum())
 }
 
 #[cfg(test)]

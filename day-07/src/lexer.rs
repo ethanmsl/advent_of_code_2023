@@ -46,7 +46,6 @@ pub enum Card {
         CK,
         CA,
 }
-
 impl Card {
         pub fn from_char(c: &char) -> Option<Card> {
                 match c {
