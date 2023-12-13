@@ -4,7 +4,9 @@
 //! (With redundancy common, and by design, between those two files.)
 
 pub mod custom_error;
-pub mod lexer;
+
+pub mod lexer_1;
+pub mod lexer_2;
 
 pub mod part1_lib;
 pub mod part2_lib;

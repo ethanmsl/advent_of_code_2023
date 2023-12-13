@@ -2,7 +2,7 @@
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
 
 // use crate::custom_error::AocErrorDay07;
-use crate::lexer::{Card, Token};
+use crate::lexer_1::{Card, Token};
 use anyhow::Result;
 use derive_more::Constructor;
 use itertools::Itertools;
