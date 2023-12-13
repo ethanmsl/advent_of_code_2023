@@ -38,10 +38,5 @@ test-case = { workspace = true }
 [dev-dependencies]
 divan = { workspace = true }
 
-[[bench]]
-name = "day-06"
-path = "benches/benchmarks.rs"
-harness = false
-
 [features]
 dhat-heap = []
