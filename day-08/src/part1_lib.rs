@@ -20,6 +20,45 @@ use tracing::{event, Level};
 ///   - Problem is non-linear, but has a nice graph representation.
 ///   - We can just solve all steps until repetition.  And then calculate # of reps from the last
 ///   step and work out remainder.  (Sparse, binary/one-hot matrices.)
+///   - e.g.
+///
+///   (L) a b c d e g z
+///    a
+///    b  1
+///    c
+///    d    1   1
+///    e          1
+///    g            1
+///    z      1       1
+///
+///   (R) a b c d e g z
+///    a
+///    b
+///    c  1
+///    d      1 1
+///    e    1     1
+///    g            1
+///    z              1
+///
+///    Divisor = RL (reversed becuase contemporary math notation is hide bound)
+///
+///   (L) a b z
+///    a    1
+///    b  1
+///    z      1
+///
+///   (R) a b z
+///    a
+///    b  1
+///    z    1 1
+///
+///  (LL) a b z
+///    a  1
+///    b    1
+///    z      1
+///
+///    Divisor = RLL (reversed becuase contemporary math notation is hide bound)
+///
 /// - Direct Automaton run along circular string.
 ///   - We can construct a FSM to make our automaton and run along string.
 ///   - Naturally pairs with problem, though it's effectively brute forcing with speed.
@@ -30,11 +69,30 @@ use tracing::{event, Level};
 ///   calculation. (relative to just running the automaton along it -- though we may be able to
 ///   collapse the input based on the language ... I'm not sure it's guaranteed to be faster than
 ///   running the automaton.)
+///
 #[tracing::instrument(skip(input))]
 pub fn process(input: &str) -> Result<i64, AocErrorDay08> {
         event!(Level::INFO, "Hiii. from  day-08 Part1! :)");
         todo!("day 08 - Part 1");
 }
+
+// (R) a b c d e g z
+//  a
+//  b
+//  c  1
+//  d        1
+//  e    1     1
+//  g
+//  z              1
+
+// (L) a b c d e g z
+//  a
+//  b  1
+//  c
+//  d   1    1
+//  e          1
+//  g            q
+//  z      1
 
 #[cfg(test)]
 mod tests {
