@@ -46,5 +46,10 @@ fn main() -> Result<()> {
         let m3_3 = m3.pow(2);
         event!(tracing::Level::INFO, "m3_3 = {}", m3_3);
 
+        // making a bool matrix
+        let m3_bool = m3.map(|x| x > 0.0);
+        event!(tracing::Level::INFO, "m3_bool = {}", m3_bool);
+        // event!(tracing::Level::INFO, "m3_bool.pow(2) = {}", m3_bool.pow(2));
+
         Ok(())
 }
