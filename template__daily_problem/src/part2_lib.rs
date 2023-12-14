@@ -3,17 +3,16 @@
 #![allow(warnings)]
 
 use crate::custom_error::AocError{{project-name | upper_camel_case}};
-use anyhow::Result;
 use derive_more::Constructor;
 use logos::{Lexer, Logos};
 use once_cell::sync::Lazy;
 use rayon::prelude::*;
 use regex::Regex;
 use tracing::{event, Level};
-// use miette::Result;
+use miette::Result;
 
-// #[tracing::instrument]
-pub fn process(_input: &str) -> Result<i64, AocError{{project-name | upper_camel_case}}> {
+#[tracing::instrument(skip(input))]
+pub fn process(input: &str) -> Result<i64, AocError{{project-name | upper_camel_case}}> {
         event!(Level::INFO, "Hiii. from  {{ project-name | kebab_case }} Part2! :)");
         todo!("{{project-name | title_case | downcase}} - Part 2");
 }
