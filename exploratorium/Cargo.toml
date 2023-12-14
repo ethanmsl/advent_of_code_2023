@@ -18,7 +18,8 @@ itertools = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 # Math
-# ...
+nalgebra = { workspace = true }
+ndarray = { workspace = true }
 # Parsing
 logos = { workspace = true }
 regex = { workspace = true }
