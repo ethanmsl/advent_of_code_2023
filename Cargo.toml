@@ -6,7 +6,7 @@ members = ["day-*", "exploratorium"]
 # Error handling
 anyhow = "1.0.75"
 miette = { version = "5.10", features = ["fancy"] }
-thiserror = "1.0.50"
+thiserror = "1.0.0"
 # Convenience
 derive_more = "0.99.17"
 indoc = "2.0.4"
@@ -19,10 +19,15 @@ tracing-subscriber = "0.3.18"
 faer = "0.16.0"
 glam = "0.24.2"
 nalgebra = { version = "0.32.3", features = ["sparse", "serde-serialize"] }
-ndarray = { version = "0.15.6", features = ["blas"] }
-#         "matrixmultiply-threading", "approx-0_5","rayon",
+ndarray = { version = "0.15.6", features = [
+        "matrixmultiply-threading",
+        "approx-0_5",
+        "rayon",
+] }
+# ndarray = { version = "0.15.6", features = ["blas"] }
 ndarray-linalg = "0.16.0"
-blas-src = { version = "0.9", features = ["accelerate"] }
+# blas-src = { version = "0.9", features = ["openblas"] }
+# blas-src = { version = "0.9", features = ["accelerate"] }
 petgraph = "0.6.4"
 rand = "0.8.5"
 # Parsing
