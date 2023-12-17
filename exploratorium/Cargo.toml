@@ -21,6 +21,8 @@ tracing-subscriber = { workspace = true }
 faer = { workspace = true }
 nalgebra = { workspace = true }
 ndarray = { workspace = true }
+ndarray-linalg = { workspace = true }
+blas-src = { workspace = true }
 # Parsing
 logos = { workspace = true }
 regex = { workspace = true }
