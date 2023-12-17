@@ -11,16 +11,10 @@ fn main() {
 
 #[divan::bench]
 fn part1() {
-        part1_lib::process(divan::black_box(include_str!(
-                "../input1.txt",
-        )))
-        .unwrap();
+        part1_lib::process(divan::black_box(include_str!("../input1.txt",))).unwrap();
 }
 
 #[divan::bench]
 fn part2() {
-        part2_lib::process(divan::black_box(include_str!(
-                "../input2.txt",
-        )))
-        .unwrap();
+        part2_lib::process(divan::black_box(include_str!("../input2.txt",))).unwrap();
 }
