@@ -5,5 +5,7 @@
 
 pub mod custom_error;
 
+pub mod parser1;
+
 pub mod part1_lib;
 pub mod part2_lib;
