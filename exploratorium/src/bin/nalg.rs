@@ -4,7 +4,7 @@ use anyhow::Result;
 use nalgebra::{Matrix2, Matrix3, Matrix4, Matrix4x6, Vector2, Vector3, Vector4};
 use tracing::event;
 
-// CoPilot please give me some example nalgebra code
+#[rustfmt::skip]
 
 #[tracing::instrument]
 fn main() -> Result<()> {
@@ -14,14 +14,21 @@ fn main() -> Result<()> {
         let v3 = Vector3::new(1.0, 2.0, 3.0);
         let v4 = Vector4::new(1.0, 2.0, 3.0, 4.0);
 
-        let m2 = Matrix2::new(1.0, 2.0, 3.0, 4.0);
-        let m3 = Matrix3::new(1.0, 2.0, 0.0, 4.0, 5.0, 0.0, 0.0, 0.0, 0.0);
-        let m4 = Matrix4::new(
-                0.1, 2.0, 3.0, 4.0, 0.5, 6.0, 7.0, 8.0, 0.9, 0.0, 1.0, 2.0, 0.3, 4.0, 5.0, 6.0,
-        );
+        let m2 = Matrix2::new(1.0, 2.0,
+                              3.0, 4.0);
+
+        let m3 = Matrix3::new(1.0, 2.0, 0.0,
+                              4.0, 5.0, 0.0,
+                              0.0, 0.0, 0.0);
+        let m4 = Matrix4::new(0.1, 2.0, 3.0, 4.0,
+                              0.5, 6.0, 7.0, 8.0,
+                              0.9, 0.0, 1.0, 2.0, 
+                              0.3, 4.0, 5.0, 6.0,);
         let m4by6 = Matrix4x6::new(
-                1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0,
-                7.0, 8.0, 9.0, 0.0, 1.0, 2.0, 3.0, 4.0,
+                                    1.0, 2.0, 3.0, 4.0, 5.0, 6.0,
+                                    7.0, 8.0, 9.0, 0.0, 1.0, 2.0,
+                                    3.0, 4.0, 5.0, 6.0, 7.0, 8.0,
+                                    9.0, 0.0, 1.0, 2.0, 3.0, 4.0,
         );
 
         let v2_2 = m2 * v2;
