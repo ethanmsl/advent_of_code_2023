@@ -2,7 +2,9 @@
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
 #![allow(warnings)]
 
-use crate::custom_error::AocErrorDay08;
+use crate::parser1::path_input;
+use crate::{custom_error::AocErrorDay08, parser1::process_input};
+use nalgebra;
 // use anyhow::Result;
 use derive_more::Constructor;
 use miette::Result;
@@ -72,6 +74,15 @@ use tracing::{event, Level};
 #[tracing::instrument(skip(input))]
 pub fn process(input: &str) -> Result<i64, AocErrorDay08> {
         event!(Level::INFO, "Hiii. from  day-08 Part1! :)");
+        let (dirs, l_mat, r_mat) = process_input(input);
+        event!(Level::INFO, "dirs: {:?}", dirs);
+        event!(Level::INFO, "l_mat: {}", l_mat);
+        event!(Level::INFO, "r_mat: {}", r_mat);
+
+        // Basic matrix multiplication
+        let result_matrix = l_mat * r_mat; // Multiply left and right matrices
+        event!(Level::INFO, "Result of l_mat * r_mat: {}", result_matrix);
+
         todo!("day 08 - Part 1");
 }
 

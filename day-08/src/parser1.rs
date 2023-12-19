@@ -34,9 +34,24 @@
 use derive_more::Constructor;
 use nalgebra::DMatrix;
 use once_cell::sync::Lazy;
+use path_input::*;
 use regex::bytes;
 use std::collections::{HashMap, HashSet};
 use tracing::{event, Level};
+
+pub fn process_input(input: &str) -> (Vec<Direction>, DMatrix<u8>, DMatrix<u8>) {
+        let mut input_lines = input.lines();
+        let first_line = input_lines
+                .next()
+                .expect("Input should have at least one line");
+        let directions = path_input::line_to_directions(first_line.as_bytes());
+        let component_lines = input_lines
+                .skip(1)
+                .map(|line| line.as_bytes())
+                .collect::<Vec<_>>();
+        let (l_mat, r_mat) = graph_components::process_components(component_lines);
+        (directions, l_mat, r_mat)
+}
 
 pub mod graph_components {
         use super::*;
@@ -86,7 +101,7 @@ pub mod graph_components {
         // NOTE: AAA -> 0 & ZZZ -> nodes.len()-1; so we shouldn't need to search by Node name.
 
         /// Rather messy construction of a couple Graph Matrices.
-        fn process_components(input_lines: Vec<&[u8]>) -> (DMatrix<bool>, DMatrix<bool>) {
+        pub fn process_components(input_lines: Vec<&[u8]>) -> (DMatrix<u8>, DMatrix<u8>) {
                 let components: Vec<RawGraphComponent> = input_lines
                         .into_iter()
                         .map(parse_raw_graph_component)
@@ -146,8 +161,8 @@ pub mod graph_components {
 
                 // Initialize and populate matrices...
                 let size = node_indices.len();
-                let mut left_matrix = DMatrix::from_element(size, size, false);
-                let mut right_matrix = DMatrix::from_element(size, size, false);
+                let mut left_matrix = DMatrix::from_element(size, size, 0);
+                let mut right_matrix = DMatrix::from_element(size, size, 0);
 
                 // Populate matrices
                 for comp in components {
@@ -155,8 +170,8 @@ pub mod graph_components {
                         let left_idx = node_indices[&comp.left_output];
                         let right_idx = node_indices[&comp.right_output];
 
-                        left_matrix[(input_idx, left_idx)] = true;
-                        right_matrix[(input_idx, right_idx)] = true;
+                        left_matrix[(left_idx, input_idx)] = 1;
+                        right_matrix[(right_idx, input_idx)] = 1;
                 }
 
                 (left_matrix, right_matrix)
@@ -199,7 +214,7 @@ pub mod path_input {
         /// Two States of Direction
         /// (Each corresponding to a different Graph Matrix)
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-        enum Direction {
+        pub enum Direction {
                 Left,
                 Right,
         }
@@ -217,7 +232,7 @@ pub mod path_input {
 
         /// Take a string with L*R* and return a vector of Directions
         /// (Originally written to take the first line of problem input.)
-        fn line_to_directions(hay: &[u8]) -> Vec<Direction> {
+        pub fn line_to_directions(hay: &[u8]) -> Vec<Direction> {
                 static RE_INPUT: Lazy<bytes::Regex> =
                         Lazy::new(|| bytes::Regex::new(INPUT).unwrap());
                 let (_, [path]) = RE_INPUT
