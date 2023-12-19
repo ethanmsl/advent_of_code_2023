@@ -32,8 +32,11 @@
 #![allow(dead_code)]
 
 use derive_more::Constructor;
+use nalgebra::DMatrix;
 use once_cell::sync::Lazy;
 use regex::bytes;
+use std::collections::{HashMap, HashSet};
+use tracing::{event, Level};
 
 pub mod graph_components {
         use super::*;
@@ -81,6 +84,106 @@ pub mod graph_components {
         // - Verify AAA & ZZZ positions are as expected (0, nodes.len()-1)
         // - Create two Graph Matrices (one for each direction)
         // NOTE: AAA -> 0 & ZZZ -> nodes.len()-1; so we shouldn't need to search by Node name.
+
+        fn process_components(input_lines: Vec<&[u8]>) -> (DMatrix<bool>, DMatrix<bool>) {
+                let components: Vec<RawGraphComponent> = input_lines
+                        .into_iter()
+                        .map(parse_raw_graph_component)
+                        .collect();
+
+                // Collect input and output nodes separately
+                let mut input_nodes = HashSet::new();
+                let mut output_nodes = HashSet::new();
+                for comp in &components {
+                        input_nodes.insert(comp.input);
+                        output_nodes.insert(comp.left_output);
+                        output_nodes.insert(comp.right_output);
+                }
+
+                event!(
+                        Level::DEBUG,
+                        "Components: {}, Input: {}, Output: {}",
+                        components.len(),
+                        input_nodes.len(),
+                        output_nodes.len()
+                );
+
+                let diff_input_not_output: HashSet<_> =
+                        input_nodes.difference(&output_nodes).collect();
+                let diff_output_not_input: HashSet<_> =
+                        output_nodes.difference(&input_nodes).collect();
+                event!(
+                        Level::DEBUG,
+                        "Diff: Input - Output: {}, Output - Input: {}",
+                        diff_input_not_output.len(),
+                        diff_output_not_input.len()
+                );
+
+                // Combine and sort nodes for matrix indices
+                let mut nodes: Vec<_> = input_nodes.union(&output_nodes).cloned().collect();
+                nodes.sort_unstable(); // Sort nodes; adjust sorting criteria as needed
+
+                // Verify positions of "AAA" and "ZZZ"
+                if nodes.first() != Some(&[b'A', b'A', b'A']) {
+                        println!("Warning: 'AAA' is not the first node.");
+                }
+                if nodes.last() != Some(&[b'Z', b'Z', b'Z']) {
+                        println!("Warning: 'ZZZ' is not the last node.");
+                }
+
+                // Map nodes to indices
+                let node_indices: HashMap<_, _> = nodes
+                        .into_iter()
+                        .enumerate()
+                        .map(|(i, node)| (node, i))
+                        .collect();
+
+                // Initialize and populate matrices...
+                let size = node_indices.len();
+                let mut left_matrix = DMatrix::from_element(size, size, false);
+                let mut right_matrix = DMatrix::from_element(size, size, false);
+
+                // Populate matrices
+                for comp in components {
+                        let input_idx = node_indices[&comp.input];
+                        let left_idx = node_indices[&comp.left_output];
+                        let right_idx = node_indices[&comp.right_output];
+
+                        left_matrix[(input_idx, left_idx)] = true;
+                        right_matrix[(input_idx, right_idx)] = true;
+                }
+
+                (left_matrix, right_matrix)
+        }
+
+        // PERF: Sparse Matrices
+        //
+        // let mut input_idxs = Vec::new();
+        // let mut left_idxs = Vec::new();
+        // let mut right_idxs = Vec::new();
+        //
+        // components.iter().for_each(|c| {
+        //     input_idxs.push(node_indices[&c.input]);
+        //     left_idxs.push(node_indices[&c.left_output]();
+        //     right_idxs.push(node_indices[&c.right_output]);
+        // });
+        //
+        // let left_matrix = CsrMatrix::from_iterator(
+        //         Dim::from_usize(size),
+        //         Dim::from_usize(size),
+        //         left_idx
+        //                 .into_iter()
+        //                 .zip(input_idx.into_iter())
+        //                 .map(|(r, c)| (r, c, true)),
+        // );
+        // let right_matrix = CsrMatrix::from_iterator(
+        //         Dim::from_usize(size),
+        //         Dim::from_usize(size),
+        //         right_idx
+        //                 .into_iter()
+        //                 .zip(input_idx.into_iter())
+        //                 .map(|(r, c)| (r, c, true)),
+        // );
 }
 
 pub mod path_input {
