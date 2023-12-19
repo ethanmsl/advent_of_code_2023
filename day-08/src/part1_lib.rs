@@ -86,15 +86,6 @@ pub fn process(input: &str) -> Result<i64, AocErrorDay08> {
         todo!("day 08 - Part 1");
 }
 
-// (R) a b c d e g z
-//  a
-//  b
-//  c  1
-//  d        1
-//  e    1     1
-//  g
-//  z              1
-
 // (L) a b c d e g z
 //  a
 //  b  1
@@ -103,6 +94,15 @@ pub fn process(input: &str) -> Result<i64, AocErrorDay08> {
 //  e          1
 //  g            q
 //  z      1
+
+// (R) a b c d e g z
+//  a
+//  b
+//  c  1
+//  d        1
+//  e    1     1
+//  g
+//  z              1
 
 #[cfg(test)]
 mod tests {
