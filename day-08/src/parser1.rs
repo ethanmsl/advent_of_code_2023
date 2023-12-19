@@ -31,54 +31,90 @@
 // #![allow(warnings)]
 #![allow(dead_code)]
 
+use derive_more::Constructor;
 use once_cell::sync::Lazy;
-use regex::Regex;
+use regex::bytes;
 
-static RE_INPUT: Lazy<Regex> = Lazy::new(|| Regex::new(INPUT).unwrap());
-const INPUT: &str = r"[LR]+";
+pub mod graph_components {
+        use super::*;
+        const GRAPH_COMPONENT: &str = r"(?x)
+                (?<inp>[A-Z]{3})       ## 3 capital char input node
+                \s = \s \(             # ' = ('
 
-// note: `(?x)` enables "verbose mode" for regex string, where whitespace is ignored
-static RE_GRAPH_COMP: Lazy<Regex> = Lazy::new(|| Regex::new(GRAPH_COMPONENT).unwrap());
-const GRAPH_COMPONENT: &str = r"(?x)
-(?<in>[A-Z]{3})           ## 3 capital char input node
-\s = \s \(                # ' = ('
+                (?<l_out>[A-Z]{3})    ## 3 capital char leftward output node
+                , \s                  # ', '
 
-(?<l_out>[A-Z]{3})     ## 3 capital char leftward output node
-, \s                      # ', '
+                (?<r_out>[A-Z]{3})    ## 3 capital char leftward output node
+                \)                    # ')'
+        "; // note: `(?x)` enables "verbose mode" for regex string, where whitespace is ignored
 
-(?<r_out>[A-Z]{3})    ## 3 capital char leftward output node
-\)                        # ')'
-";
+        /// Raw Graph Component Data read from a Byte-String
+        #[derive(Constructor, Debug, Clone, Copy, PartialEq, Eq)]
+        struct RawGraphComponent {
+                input: [u8; 3],
+                left_output: [u8; 3],
+                right_output: [u8; 3],
+        }
 
-// let dists: Vec<_> = RE_NUM
-//         .find_iter(line)
-//         .map(|m| m.as_str().parse::<i64>().expect("parse failure"))
-//         .collect();
-// )
-// let inp = caps
-//         .name("input")
-//         .expect("invalid 'input' map header")
-//         .as_str()
-//         .to_string();
+        /// Parse a RawGraphComponent from a Byte-String
+        /// Using Regex Capture groups
+        fn parse_raw_graph_component(hay: &[u8]) -> RawGraphComponent {
+                static RE_GRAPH_COMP: Lazy<bytes::Regex> =
+                        Lazy::new(|| bytes::Regex::new(GRAPH_COMPONENT).unwrap());
 
-/// Two States of Direction
-/// (Each corresponding to a different Graph Matrix)
-enum Direction {
-        Left,
-        Right,
+                let (_, [inp, l_out, r_out]) = RE_GRAPH_COMP
+                        .captures(hay)
+                        .map(|caps| caps.extract())
+                        .expect("Regex Extraction Failure.");
+
+                RawGraphComponent {
+                        input: inp.try_into().expect("invalid input node"),
+                        left_output: l_out.try_into().expect("invalid input node"),
+                        right_output: r_out.try_into().expect("invalid input node"),
+                }
+        }
+
+        // TODO:
+        // Collect all RawGraph Components.
+        // Extract all Nodes into Vec.  Use Vec to defined Node indices and define Graph Matrix.
+        // - Verify Input and Output Nodes are equivalent sets.
+        // - Verify AAA & ZZZ positions are as expected (0, nodes.len()-1)
+        // - Create two Graph Matrices (one for each direction)
+        // NOTE: AAA -> 0 & ZZZ -> nodes.len()-1; so we shouldn't need to search by Node name.
 }
 
-/// Char to Dir
-/// Should this be its own function? :shrug:, lol
-fn char_to_dir(c: char) -> Direction {
-        match c {
-                'L' => Direction::Left,
-                'R' => Direction::Right,
-                _ => panic!("invalid direction char"),
+pub mod path_input {
+        use super::*;
+        const INPUT: &str = r"^(?<path>[LR]+)$";
+
+        /// Two States of Direction
+        /// (Each corresponding to a different Graph Matrix)
+        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        enum Direction {
+                Left,
+                Right,
+        }
+        impl Direction {
+                /// Char to Dir
+                /// Should this be its own function? :shrug:, lol
+                fn byte_to_dir(c: &u8) -> Direction {
+                        match c {
+                                b'L' => Direction::Left,
+                                b'R' => Direction::Right,
+                                _ => panic!("invalid direction char"),
+                        }
+                }
+        }
+
+        /// Take a string with L*R* and return a vector of Directions
+        /// (Originally written to take the first line of problem input.)
+        fn line_to_directions(hay: &[u8]) -> Vec<Direction> {
+                static RE_INPUT: Lazy<bytes::Regex> =
+                        Lazy::new(|| bytes::Regex::new(INPUT).unwrap());
+                let (_, [path]) = RE_INPUT
+                        .captures(hay)
+                        .map(|caps| caps.extract())
+                        .expect("Regex Extraction Failure.");
+                path.iter().map(Direction::byte_to_dir).collect()
         }
 }
-
-//Line 1 : ^[LR]+$ Ls & Rs, in order.
-//Line 3 +:
-// AAA = (BBB, CCC)
-// (?<in>[A-Z]{3}) = \( (?<left_out>[A-Z]{3}) , (?<right_out>[A-Z]{3}) \)
