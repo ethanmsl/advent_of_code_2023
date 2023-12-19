@@ -85,6 +85,7 @@ pub mod graph_components {
         // - Create two Graph Matrices (one for each direction)
         // NOTE: AAA -> 0 & ZZZ -> nodes.len()-1; so we shouldn't need to search by Node name.
 
+        /// Rather messy construction of a couple Graph Matrices.
         fn process_components(input_lines: Vec<&[u8]>) -> (DMatrix<bool>, DMatrix<bool>) {
                 let components: Vec<RawGraphComponent> = input_lines
                         .into_iter()
@@ -100,6 +101,10 @@ pub mod graph_components {
                         output_nodes.insert(comp.right_output);
                 }
 
+                // Combine and sort nodes for matrix indices
+                let mut nodes: Vec<_> = input_nodes.union(&output_nodes).cloned().collect();
+                nodes.sort_unstable(); // Sort nodes; adjust sorting criteria as needed
+
                 event!(
                         Level::DEBUG,
                         "Components: {}, Input: {}, Output: {}",
@@ -108,27 +113,28 @@ pub mod graph_components {
                         output_nodes.len()
                 );
 
-                let diff_input_not_output: HashSet<_> =
-                        input_nodes.difference(&output_nodes).collect();
-                let diff_output_not_input: HashSet<_> =
-                        output_nodes.difference(&input_nodes).collect();
-                event!(
-                        Level::DEBUG,
-                        "Diff: Input - Output: {}, Output - Input: {}",
-                        diff_input_not_output.len(),
-                        diff_output_not_input.len()
-                );
+                // Check extent to which input and output nodes differ
+                // (Neither needs to be included wholly in the other.  But I'm curious.)
+                #[cfg(debug_assertions)]
+                {
+                        let diff_input_not_output: HashSet<_> =
+                                input_nodes.difference(&output_nodes).collect();
+                        let diff_output_not_input: HashSet<_> =
+                                output_nodes.difference(&input_nodes).collect();
+                        event!(
+                                Level::DEBUG,
+                                "Diff: Input - Output: {}, Output - Input: {}",
+                                diff_input_not_output.len(),
+                                diff_output_not_input.len()
+                        );
 
-                // Combine and sort nodes for matrix indices
-                let mut nodes: Vec<_> = input_nodes.union(&output_nodes).cloned().collect();
-                nodes.sort_unstable(); // Sort nodes; adjust sorting criteria as needed
-
-                // Verify positions of "AAA" and "ZZZ"
-                if nodes.first() != Some(&[b'A', b'A', b'A']) {
-                        println!("Warning: 'AAA' is not the first node.");
-                }
-                if nodes.last() != Some(&[b'Z', b'Z', b'Z']) {
-                        println!("Warning: 'ZZZ' is not the last node.");
+                        // Verify positions of "AAA" and "ZZZ"
+                        if nodes.first() != Some(&[b'A', b'A', b'A']) {
+                                println!("Warning: 'AAA' is not the first node.");
+                        }
+                        if nodes.last() != Some(&[b'Z', b'Z', b'Z']) {
+                                println!("Warning: 'ZZZ' is not the last node.");
+                        }
                 }
 
                 // Map nodes to indices
