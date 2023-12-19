@@ -152,6 +152,7 @@ mod tests {
         // #[ignore]
         // #[test]
         // fn test_process_problem_input() -> Result<()> {
+        //         tracing_subscriber::fmt::init();
         //         let file_input = include_str!("../input1.txt");
         //         let expected = todo!();
         //         assert_eq!(process(file_input)?, expected);
