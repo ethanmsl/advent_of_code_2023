@@ -5,7 +5,6 @@
 use crate::custom_error::AocErrorDay08;
 // use anyhow::Result;
 use derive_more::Constructor;
-use logos::{Lexer, Logos};
 use miette::Result;
 use once_cell::sync::Lazy;
 use rayon::prelude::*;
