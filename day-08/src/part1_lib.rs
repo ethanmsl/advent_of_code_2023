@@ -2,9 +2,9 @@
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
 #![allow(warnings)]
 
-use crate::parser1::path_input;
+use crate::parser1::path_input::{self, Direction as D};
 use crate::{custom_error::AocErrorDay08, parser1::process_input};
-use nalgebra;
+use nalgebra::{DMatrix, DVector};
 // use anyhow::Result;
 use derive_more::Constructor;
 use miette::Result;
@@ -72,20 +72,102 @@ use tracing::{event, Level};
 ///   running the automaton.)
 ///
 #[tracing::instrument(skip(input))]
-pub fn process(input: &str) -> Result<i64, AocErrorDay08> {
+pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
         event!(Level::INFO, "Hiii. from  day-08 Part1! :)");
         let (dirs, l_mat, r_mat) = process_input(input);
         event!(Level::INFO, "dirs: {:?}", dirs);
-        event!(Level::INFO, "l_mat: {}", l_mat);
-        event!(Level::INFO, "r_mat: {}", r_mat);
+        event!(Level::TRACE, "l_mat: {}", l_mat);
+        event!(Level::TRACE, "r_mat: {}", r_mat);
+        let fp_len = dirs.len();
 
         // Basic matrix multiplication
-        let result_matrix = l_mat * r_mat; // Multiply left and right matrices
-        event!(Level::INFO, "Result of l_mat * r_mat: {}", result_matrix);
+        let trips = dirs
+                .iter()
+                .map(|dir| match dir {
+                        D::Left => &l_mat,
+                        D::Right => &r_mat,
+                })
+                .scan(
+                        nalgebra::DMatrix::identity(l_mat.nrows(), l_mat.ncols()),
+                        |acc, mat| {
+                                let new_mat = mat * &*acc;
+                                *acc = new_mat.clone();
+                                Some(new_mat)
+                        },
+                )
+                .collect::<Vec<_>>();
+        #[cfg(debug_assertions)]
+        {
+                for (id, mat) in trips.iter().enumerate() {
+                        event!(
+                                Level::TRACE,
+                                "\nmat[{}]: dirs[0..=id]: {:?} \n {}",
+                                id,
+                                dirs[0..=id].iter().collect::<Vec<_>>(),
+                                mat,
+                        );
+                }
+        }
 
-        todo!("day 08 - Part 1");
+        let full_trip_matrix = &trips[fp_len - 1];
+        let (ub, final_start_idx) =
+                get_upper_bound(full_trip_matrix, 100).expect("no upperbound solution found");
+        event!(
+                Level::INFO,
+                "ub: {:?} * {} (length of full rotation), with final start index of: {}",
+                ub,
+                fp_len,
+                final_start_idx,
+        );
+        let remainder_trips =
+                get_trips_to_end(&trips, final_start_idx).expect("no remainder solution found");
+        let total_trips = (ub - 1) * dirs.len() + remainder_trips + 1;
+        event!(Level::INFO, "remainder_trips: {}", remainder_trips);
+        event!(Level::INFO, "total_trips: {}", total_trips);
+
+        Ok(total_trips)
+}
+/// Returns the upper bound on the number of complete trips to get a solution and index to start at
+fn get_upper_bound(mat: &DMatrix<u8>, some_reasonable_limit: usize) -> Option<(usize, usize)> {
+        let size = mat.ncols();
+
+        // AAA is always 0
+        let mut current_index = 0;
+
+        for n in 1..=some_reasonable_limit {
+                // Only one non-zero per column
+                let next_index = mat.column(current_index).iter().position(|&x| x != 0)?;
+
+                // ZZZ is always len()-1
+                if next_index == size - 1 {
+                        return Some((n, current_index));
+                }
+
+                current_index = next_index;
+        }
+
+        None
 }
 
+/// Returns the number of trips it takes to get to the same ZZZ index from a given start index
+fn get_trips_to_end(trips: &[DMatrix<u8>], start_index: usize) -> Option<usize> {
+        let size = trips.first().expect("empty matrix vector").clone().ncols();
+
+        event!(Level::TRACE, "trips: {:?}", trips);
+        event!(Level::DEBUG, "start_index: {:?}", start_index);
+        for (n, mat) in trips.iter().enumerate() {
+                // Only one non-zero per column
+                let next_index = mat.column(start_index).iter().position(|&x| x != 0)?;
+
+                // ZZZ is always len()-1
+                if next_index == size - 1 {
+                        return Some(n);
+                }
+        }
+
+        // If the end is not reached, return None
+        None
+}
 // (L) a b c d e g z
 //  a
 //  b  1
@@ -149,12 +231,12 @@ mod tests {
         // /// verification of solution.
         // /// (useful for future refactors and perfs)
         // /// NOTE: `#[ignore]` is set for this test by default.
-        // #[ignore]
+        // // #[ignore]
         // #[test]
         // fn test_process_problem_input() -> Result<()> {
         //         tracing_subscriber::fmt::init();
         //         let file_input = include_str!("../input1.txt");
-        //         let expected = todo!();
+        //         let expected = 0;
         //         assert_eq!(process(file_input)?, expected);
         //         Ok(())
         // }

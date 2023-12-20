@@ -143,6 +143,14 @@ pub mod graph_components {
                                 diff_output_not_input.len()
                         );
 
+                        event!(
+                                Level::DEBUG,
+                                "first is: {:?}, last is: {:?}, comp.len(): {}",
+                                std::str::from_utf8(nodes.first().unwrap()).unwrap(),
+                                std::str::from_utf8(nodes.last().unwrap()).unwrap(),
+                                components.len(),
+                        );
+
                         // Verify positions of "AAA" and "ZZZ"
                         if nodes.first() != Some(&[b'A', b'A', b'A']) {
                                 println!("Warning: 'AAA' is not the first node.");
@@ -167,11 +175,16 @@ pub mod graph_components {
                 // Populate matrices
                 for comp in components {
                         let input_idx = node_indices[&comp.input];
-                        let left_idx = node_indices[&comp.left_output];
-                        let right_idx = node_indices[&comp.right_output];
-
-                        left_matrix[(left_idx, input_idx)] = 1;
-                        right_matrix[(right_idx, input_idx)] = 1;
+                        // ZZZ Special case (always goes to itself)
+                        if comp.input == [b'Z', b'Z', b'Z'] {
+                                left_matrix[(input_idx, input_idx)] = 1;
+                                right_matrix[(input_idx, input_idx)] = 1;
+                        } else {
+                                let left_idx = node_indices[&comp.left_output];
+                                let right_idx = node_indices[&comp.right_output];
+                                left_matrix[(left_idx, input_idx)] = 1;
+                                right_matrix[(right_idx, input_idx)] = 1;
+                        }
                 }
 
                 (left_matrix, right_matrix)
