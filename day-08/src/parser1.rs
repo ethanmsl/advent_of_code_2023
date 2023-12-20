@@ -1,4 +1,4 @@
-//! Parsing library code for Day 08 of Advent of Code 2023.
+//! Parsing library code for Part1 of Day 08 of Advent of Code 2023.
 //!
 //! Comments on parsing explored recently here:
 //! (For context there was previously some Logos crate seed code.  And I expanded that while
@@ -29,7 +29,6 @@
 //! This feels like an excellent option, with long legs should I decide to
 //! improve performance that way.
 // #![allow(warnings)]
-#![allow(dead_code)]
 
 use derive_more::Constructor;
 use nalgebra::DMatrix;

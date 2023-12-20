@@ -1,16 +1,10 @@
 //! Library code for Part 1 of Day 08 of Advent of Code 2023.
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
-#![allow(warnings)]
 
-use crate::parser1::path_input::{self, Direction as D};
+use crate::parser1::path_input::Direction as D;
 use crate::{custom_error::AocErrorDay08, parser1::process_input};
-use nalgebra::{DMatrix, DVector};
-// use anyhow::Result;
-use derive_more::Constructor;
 use miette::Result;
-use once_cell::sync::Lazy;
-use rayon::prelude::*;
-use regex::Regex;
+use nalgebra::DMatrix;
 use tracing::{event, Level};
 
 /// Time for a repeatable path to find a solution.
