@@ -8,9 +8,73 @@ use nalgebra::DMatrix;
 use tracing::{event, Level};
 
 /// Part2 is an easy adaptation from Part1.
-/// We just need an two sets of indices for all elements ending with A and with Z
+/// BUG: We just need an two sets of indices for all elements ending with A and with Z
 /// And then we do the same thing, but instead of looking for ZZZ, we look for All Z's
 /// (for simplicity we may as well pre-calculate that vector)
+/// NOTE:That solution will not work with the original efficiencie approach.  As having had each
+/// sub path hit a goal sometime in a range does not guarantee that they overlapped.
+/// You could use it to ignore cases where not all paths output a solution in that rotation,
+/// and that would give some perf option.  But also complicate, as short circuits will obscure
+/// some paths you may need.  (You could add a single tracer row/column though.)
+/// - A separate, promising solution also needs to be thrown away:
+///     - If there were only one point in a cycle that a solution was entered then we could
+///     calculate each individually and do some math with prime components of path lenghts to
+///     calculate the correct solution.  But we'd need to calculate all the entries to solution
+///     states from all possible start states (since they can move over path rotations)
+///     -  This is perhaps doable, but also needs to be done at each step for each start state.
+///         - Which is 726* 307 = 222_882 calcs.
+///             - Mind you, that's not matrix multiplications.  We still are ceilined at  307 of
+///             those.  Still.  It's a bit of an issue.
+///
+/// OPTIONS:
+/// - Take the input values as a vector and just run through all 307 calculated vectors in parallel
+/// - Alongside all the full rotation outputs along each. These are mostly vec .> mat calcs, vs mat
+/// calcs (still expensive, 726^2 = 500k, vs ^3).  The parallelism is nice, but small.
+/// - Naively you'd also need to check the hot indices vs a hashset
+/// - PERF: add an index element that all solutions ouput 1 2. -- Then you can just check if that
+/// index has a value = stat_nodes.len()
+///
+/// ??? - What of collapsing the start nodes?  <--NO, you can copy & collapse, but not much won.
+///     - So, if S1 --> A, S2 --> B, S3 --> A we make a node S123 --> AAB :([2,1,0...0])
+///     - We're *already* using u8s.  So we could track numbers.
+///     - WARN: there must be *no rentrance* to that state.  As the independence algebra won't be
+///     able to do that logic.  In that case the multi-weighting is okay.  BUT it comes at the cost
+///     of having to deal with that junk element forever.  And we can't get rid of the other start
+///     nodes as they may play roles in various continuation paths.
+///
+/// TODO:
+/// How long till world state *must* repeat?  dir.len() * row.len() -- for a single start.
+///     - which is 307 * 726 = 222_882 -- 223k look ups. (not that bad)
+///     - So we can look at, say, 20K (made up) possible solution points.
+///     - From that, we can inspect all inputs that lead to them. .. working back to the dir
+///     rotation start.  From there we can iterate on vector multiplications of full rotation
+///     matrix. To find the first full time the input state gives the a solution state.
+/// - ^ ... This actually sounds practical.  Even without using sparsity. Or other matrix perfs.
+/// 1) Get vector of pure solve states. Get needed entry state from each stage calculation.
+/// 2) (save each one along with steps to get there )
+/// 3) Iterate with start vector multiplications on the full dir rotation.
+///     3.1) At each stage check if output is a **SUB**set of a solver state.
+///     3.2) if it ad full-rot calcs * dirs.len() + the lookup steps for solution state you're
+///       included in
+/// Q) Effective searching for subsets... (worst case: 307 hashsets that we do < 726 .contains()
+/// for each ... but bleh! <-- with short-circuit failling probably not too bad)
+///     - PERF: we could find maximally distinguishable output elements and start search with
+///     those, but that's more implementation than I want to do for this.
+///
+/// NOTE: OBVIOUSLY, we could just do all this with an NFA.
+/// - We can construct the NFA directly from the input, convert directions to a bitstring, and
+/// then just run along it on rotation.  Only accepting when all solution states hit
+/// simultaneously.
+/// - We can direct construct a PikeVM NFA in `regex-automata`. And we can get locations of all
+/// patttern matches, so, if we combined with streaming, or just some repeat tracker, we could
+/// probably very efficiently solve this.  (in *principle* it could take much longer, but the
+/// efficiency and likely non-catastrophic solution mean that it would probably be a great approach)
+/// - And direct constructing an NFA does sound fun.  (I want to get familiar with the
+/// `regex-automata` crate.  *AND* if that got akward we could translate the AutomatonGraph into a
+/// BitRegex. And use regular regex.  Heck, we could even just use a parsecombinator like Nom --
+/// this would probably be a great case for it. -- It would just have to have some state store and
+/// check somewhere... not sure how ergonomic the NFA version would be, but prob fine.)
+///
 ///
 /// (Incidentally, at first this was sounding like an NFA style problem, but it's not
 /// , but classic NFA wouldn't have the states aware of one another.  Though, implementaiton wise,
