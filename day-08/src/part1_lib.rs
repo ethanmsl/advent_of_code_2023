@@ -65,6 +65,15 @@ use tracing::{event, Level};
 ///   collapse the input based on the language ... I'm not sure it's guaranteed to be faster than
 ///   running the automaton.)
 ///
+/// NOTE: for the main input: 307 Dirs, so about 307 multilications of a 726 wide square matrix
+///       which amounts to 307 * 726^3 = 307 * 382_657_176 = 117__475_753_032 u8 multiplications.
+///
+///       given that the solution is 24_253 (trips, representable by mults)
+///       This saved us 23_946 matrix multiplications (or 9_163__108_736_496 [9trillion, 9e13] u8
+///       multiplications).
+///       It took about 3 seconds to solve (*should* be using sparse and boolean values -- curious
+///       to see the win there) -- so a savings of about 4 minutes (3 seconds vs 4.2 minutes; with
+///       the rough "3 seconds to solve everything estimate")
 #[tracing::instrument(skip(input))]
 pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
         event!(Level::INFO, "Hiii. from  day-08 Part1! :)");
@@ -73,6 +82,13 @@ pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
         event!(Level::TRACE, "l_mat: {}", l_mat);
         event!(Level::TRACE, "r_mat: {}", r_mat);
         let fp_len = dirs.len();
+        event!(Level::WARN, "dirs len: {:?}", fp_len);
+        event!(
+                Level::WARN,
+                "l_mat, rows x cols: {} x {}",
+                l_mat.nrows(),
+                l_mat.ncols()
+        );
 
         // Basic matrix multiplication
         let trips = dirs
