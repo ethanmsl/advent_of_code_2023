@@ -227,17 +227,18 @@ mod tests {
                 Ok(())
         }
 
-        // /// This test's expected value is to be populated after
-        // /// verification of solution.
-        // /// (useful for future refactors and perfs)
-        // /// NOTE: `#[ignore]` is set for this test by default.
-        // // #[ignore]
-        // #[test]
-        // fn test_process_problem_input() -> Result<()> {
-        //         tracing_subscriber::fmt::init();
-        //         let file_input = include_str!("../input1.txt");
-        //         let expected = 0;
-        //         assert_eq!(process(file_input)?, expected);
-        //         Ok(())
-        // }
+        /// NOTE: Debug-Mode vs Release has a huuuuge impact on speed
+        /// This test's expected value is to be populated after
+        /// verification of solution.
+        /// (useful for future refactors and perfs)
+        /// NOTE: `#[ignore]` is set for this test by default.
+        // #[ignore]
+        #[test]
+        fn test_process_problem_input() -> Result<()> {
+                // tracing_subscriber::fmt::init();
+                let file_input = include_str!("../input1.txt");
+                let expected = 24253;
+                assert_eq!(process(file_input)?, expected);
+                Ok(())
+        }
 }
