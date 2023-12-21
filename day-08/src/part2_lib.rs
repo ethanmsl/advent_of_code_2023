@@ -6,6 +6,7 @@ use crate::parser2::path_input::Direction as D;
 use crate::{custom_error::AocErrorDay08, parser2::process_input};
 use miette::Result;
 use nalgebra::{DMatrix, DVector};
+use rayon::prelude::*;
 use std::collections::HashSet;
 use tracing::{event, Level};
 
@@ -112,7 +113,7 @@ pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
         let mut rotations = 0;
         loop {
                 found = solving_inputs
-                        .iter()
+                        .par_iter()
                         .position(|sol| current_input.is_subset(&sol));
                 if found.is_some() {
                         break;
