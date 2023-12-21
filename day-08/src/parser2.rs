@@ -38,7 +38,13 @@ use regex::bytes;
 use std::collections::{HashMap, HashSet};
 use tracing::{event, Level};
 
-pub fn process_input(input: &str) -> (Vec<Direction>, DMatrix<u8>, DMatrix<u8>) {
+pub fn process_input(
+        input: &str,
+) -> (
+        Vec<Direction>,
+        (DMatrix<u8>, DMatrix<u8>),
+        (Vec<usize>, Vec<usize>),
+) {
         let mut input_lines = input.lines();
         let first_line = input_lines
                 .next()
@@ -48,8 +54,9 @@ pub fn process_input(input: &str) -> (Vec<Direction>, DMatrix<u8>, DMatrix<u8>) 
                 .skip(1)
                 .map(|line| line.as_bytes())
                 .collect::<Vec<_>>();
-        let (l_mat, r_mat) = graph_components::process_components(component_lines);
-        (directions, l_mat, r_mat)
+        let ((l_mat, r_mat), (start_idxs, solution_idxs)) =
+                graph_components::process_components(component_lines);
+        (directions, (l_mat, r_mat), (start_idxs, solution_idxs))
 }
 
 pub mod graph_components {
@@ -92,7 +99,9 @@ pub mod graph_components {
         }
 
         /// Rather messy construction of a couple Graph Matrices.
-        pub fn process_components(input_lines: Vec<&[u8]>) -> (DMatrix<u8>, DMatrix<u8>) {
+        pub fn process_components(
+                input_lines: Vec<&[u8]>,
+        ) -> ((DMatrix<u8>, DMatrix<u8>), (Vec<usize>, Vec<usize>)) {
                 let components: Vec<RawGraphComponent> = input_lines
                         .into_iter()
                         .map(parse_raw_graph_component)
@@ -106,6 +115,8 @@ pub mod graph_components {
                         output_nodes.insert(comp.left_output);
                         output_nodes.insert(comp.right_output);
                 }
+                let start_nodes = input_nodes.iter().filter(|node| node[2] == b'A');
+                let solution_nodes = input_nodes.iter().filter(|node| node[2] == b'Z');
 
                 // Combine and sort nodes for matrix indices
                 let mut nodes: Vec<_> = input_nodes.union(&output_nodes).cloned().collect();
@@ -141,14 +152,6 @@ pub mod graph_components {
                                 std::str::from_utf8(nodes.last().unwrap()).unwrap(),
                                 components.len(),
                         );
-
-                        // Verify positions of "AAA" and "ZZZ"
-                        if nodes.first() != Some(&[b'A', b'A', b'A']) {
-                                println!("Warning: 'AAA' is not the first node.");
-                        }
-                        if nodes.last() != Some(&[b'Z', b'Z', b'Z']) {
-                                println!("Warning: 'ZZZ' is not the last node.");
-                        }
                 }
 
                 // Map nodes to indices
@@ -174,7 +177,24 @@ pub mod graph_components {
                         right_matrix[(right_idx, input_idx)] = 1;
                 }
 
-                (left_matrix, right_matrix)
+                let start_idxs: Vec<usize> = start_nodes
+                        .into_iter()
+                        .map(|node| {
+                                *node_indices
+                                        .get(node)
+                                        .expect("start nodes should be mapped")
+                        })
+                        .collect();
+                let solution_idxs: Vec<usize> = solution_nodes
+                        .into_iter()
+                        .map(|node| {
+                                *node_indices
+                                        .get(node)
+                                        .expect("solution nodes should be mapped")
+                        })
+                        .collect();
+
+                ((left_matrix, right_matrix), (start_idxs, solution_idxs))
         }
 
         // PERF: Sparse Matrices

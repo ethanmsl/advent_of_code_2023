@@ -5,6 +5,7 @@ use crate::parser2::path_input::Direction as D;
 use crate::{custom_error::AocErrorDay08, parser2::process_input};
 use miette::Result;
 use nalgebra::DMatrix;
+use std::collections::HashSet;
 use tracing::{event, Level};
 
 /// Part2 is an easy adaptation from Part1.
@@ -92,7 +93,7 @@ use tracing::{event, Level};
 #[tracing::instrument(skip(input))]
 pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
         event!(Level::INFO, "Hiii. from  day-08 Part1! :)");
-        let (dirs, l_mat, r_mat) = process_input(input);
+        let (dirs, (l_mat, r_mat), (start_idxs, solution_idxs)) = process_input(input);
         event!(Level::INFO, "dirs: {:?}", dirs);
         event!(Level::TRACE, "l_mat: {}", l_mat);
         event!(Level::TRACE, "r_mat: {}", r_mat);
@@ -118,6 +119,10 @@ pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
 
         // TODO: here's where we need to change code
         // - Multiply tr of each matrix by solution space to get needed input superset.
+        let valid_solution_supersets: Vec<HashSet<Vec<u8>>> = todo!();
+        // fn generate new_inputs
+        // while { let (new_inputs, rotation) = generate_new_inputs(new_inputs.last()); let found = valid_solution_supersets.iter().find(|sol| sol.contains(new_inputs));  match
+        // found {None => pass, Some(inp) =>}}
         let (ub, final_start_idx) =
                 get_upper_bound(full_trip_matrix, 100).expect("no upperbound solution found");
         event!(
