@@ -93,65 +93,69 @@ use tracing::{event, Level};
 ///
 #[tracing::instrument(skip(input))]
 pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
-        event!(Level::INFO, "Hiii. from  day-08 Part2! :)");
         let (dirs, (l_mat, r_mat), (start_idxs, solution_idxs)) = process_input(input);
-        let fp_len = dirs.len();
-        event!(Level::INFO, fp_len);
-        event!(Level::DEBUG, "dirs: {:?}", dirs);
-        event!(Level::TRACE, "l_mat: {}", l_mat);
-        event!(Level::TRACE, "r_mat: {}", r_mat);
-
-        // Basic matrix multiplication, giving us input to n steps output maps at each step
+        // [A, AB, ABC, ... AB..Z]
         let start_to_x_trips = dirs_to_paths(&dirs, (&l_mat, &r_mat));
+
+        let mat_side_len = l_mat.nrows();
+        let fp_len = dirs.len();
+        let full_trip = &start_to_x_trips[fp_len - 1];
+
+        let solving_inputs: Vec<HashSet<usize>> =
+                calculate_solving_inputs(&start_to_x_trips, &solution_idxs);
+
+        // loop through rotation outputs and see if any solve
+        let mut current_invec = convert_indices_to_vector(&start_idxs, mat_side_len);
+        let mut current_input = find_ones_indices(&current_invec);
+        let mut previous_invec;
+        let mut found = None;
+        let mut rotations = 0;
+        loop {
+                found = solving_inputs
+                        .iter()
+                        .position(|sol| current_input.is_subset(&sol));
+                if found.is_some() {
+                        break;
+                };
+                previous_invec = current_invec;
+                current_invec = full_trip * &previous_invec;
+                current_input = find_ones_indices(&current_invec);
+                rotations += 1;
+                event!(Level::TRACE, rotations);
+                event!(Level::TRACE, "current input_vec: {}", current_invec);
+        }
+        event!(
+                Level::WARN,
+                "found a solution at: {}_rots + 1+{:?}_steps",
+                rotations,
+                found
+        );
 
         #[cfg(debug_assertions)]
         {
-                for (id, mat) in start_to_x_trips.iter().enumerate() {
-                        event!(
-                                Level::TRACE,
-                                "\nmat[{}]: dirs[0..=id]: {:?} \n {}",
-                                id,
-                                dirs[0..=id].iter().collect::<Vec<_>>(),
-                                mat,
-                        );
-                }
+                event!(Level::INFO, "solving_inputs: {:?}", solving_inputs);
+                event!(Level::TRACE, "full_trip_matrix: {}", full_trip);
+                event!(Level::INFO, "solution_idxs: {:?}", solution_idxs);
+                event!(Level::INFO, "start_idxs: {:?}", start_idxs);
         }
 
-        // [A, AB, ABC, ... AB..Z]
-        let full_trip_matrix = &start_to_x_trips[fp_len - 1];
-        let solving_inputs: Vec<HashSet<usize>> =
-                calculate_solving_inputs(&start_to_x_trips, &solution_idxs);
-        event!(Level::INFO, "solving_inputs: {:?}", solving_inputs);
-        event!(Level::TRACE, "full_trip_matrix: {}", full_trip_matrix);
-        event!(Level::INFO, "solution_idxs: {:?}", solution_idxs);
-        event!(Level::INFO, "start_idxs: {:?}", start_idxs);
-        // fn generate new_inputs
-        // while { let (new_inputs, rotation) = generate_new_inputs(new_inputs.last()); let found = valid_solution_supersets.iter().find(|sol| sol.contains(new_inputs));  match
-        // found {None => pass, Some(inp) =>}}
-        let (ub, final_start_idx) =
-                get_upper_bound(full_trip_matrix, 100).expect("no upperbound solution found");
-        event!(
-                Level::INFO,
-                "ub: {:?} * {} (length of full rotation), with final start index of: {}",
-                ub,
-                fp_len,
-                final_start_idx,
-        );
-        let remainder_trips = get_trips_to_end(&start_to_x_trips, final_start_idx)
-                .expect("no remainder solution found");
-        let total_trips = (ub - 1) * dirs.len() + remainder_trips + 1;
-        event!(Level::INFO, "remainder_trips: {}", remainder_trips);
-        event!(Level::INFO, "total_trips: {}", total_trips);
+        Ok(found.expect("should be Some if we got here") + 1 + rotations * fp_len)
+}
 
-        Ok(total_trips)
+/// Finds the indices of all elements in a vector that are equal to 1.
+fn find_ones_indices(vector: &DVector<u8>) -> HashSet<usize> {
+        vector.iter()
+                .enumerate()
+                .filter_map(|(idx, &val)| if val == 1 { Some(idx) } else { None })
+                .collect()
 }
 
 /// Converts a list of indices into a vector of 0s and 1s.
 /// 1s are placed at the indices specified in `solution_idxs`.
-fn convert_indices_to_vector(solution_idxs: &[usize], max_size: usize) -> DVector<u8> {
+fn convert_indices_to_vector(idxs: &[usize], max_size: usize) -> DVector<u8> {
         let mut vector = DVector::from_element(max_size, 0u8);
 
-        for &idx in solution_idxs {
+        for &idx in idxs {
                 if idx < max_size {
                         vector[idx] = 1;
                 }
@@ -237,64 +241,6 @@ fn dirs_to_paths(
                 )
                 .collect::<Vec<_>>()
 }
-/// Returns the upper bound on the number of complete trips to get a solution and index to start at
-fn get_upper_bound(mat: &DMatrix<u8>, some_reasonable_limit: usize) -> Option<(usize, usize)> {
-        let size = mat.ncols();
-
-        // AAA is always 0
-        let mut current_index = 0;
-
-        for n in 1..=some_reasonable_limit {
-                // Only one non-zero per column
-                let next_index = mat.column(current_index).iter().position(|&x| x != 0)?;
-
-                // ZZZ is always len()-1
-                if next_index == size - 1 {
-                        return Some((n, current_index));
-                }
-
-                current_index = next_index;
-        }
-
-        None
-}
-
-/// Returns the number of trips it takes to get to the same ZZZ index from a given start index
-fn get_trips_to_end(trips: &[DMatrix<u8>], start_index: usize) -> Option<usize> {
-        let size = trips.first().expect("empty matrix vector").clone().ncols();
-
-        event!(Level::TRACE, "trips: {:?}", trips);
-        event!(Level::DEBUG, "start_index: {:?}", start_index);
-        for (n, mat) in trips.iter().enumerate() {
-                // Only one non-zero per column
-                let next_index = mat.column(start_index).iter().position(|&x| x != 0)?;
-
-                // ZZZ is always len()-1
-                if next_index == size - 1 {
-                        return Some(n);
-                }
-        }
-
-        // If the end is not reached, return None
-        None
-}
-// (L) a b c d e g z
-//  a
-//  b  1
-//  c
-//  d   1    1
-//  e          1
-//  g            q
-//  z      1
-
-// (R) a b c d e g z
-//  a
-//  b
-//  c  1
-//  d        1
-//  e    1     1
-//  g
-//  z              1
 
 #[cfg(test)]
 mod tests {
