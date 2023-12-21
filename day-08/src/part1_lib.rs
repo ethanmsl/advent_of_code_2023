@@ -67,7 +67,7 @@ use tracing::{event, Level};
 ///
 /// NOTE: for the main input: 307 Dirs, so about 307 multilications of a 726 wide square matrix
 ///       which amounts to 307 * 726^3 = 307 * 382_657_176 = 117__475_753_032 u8 multiplications.
-///
+///       |
 ///       given that the solution is 24_253 (trips, representable by mults)
 ///       This saved us 23_946 matrix multiplications (or 9_163__108_736_496 [9trillion, 9e13] u8
 ///       multiplications).
