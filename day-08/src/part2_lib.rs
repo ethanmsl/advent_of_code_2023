@@ -5,7 +5,7 @@
 use crate::parser2::path_input::Direction as D;
 use crate::{custom_error::AocErrorDay08, parser2::process_input};
 use miette::Result;
-use nalgebra::DMatrix;
+use nalgebra::{DMatrix, DVector};
 use std::collections::HashSet;
 use tracing::{event, Level};
 
@@ -117,11 +117,14 @@ pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
                 }
         }
 
+        // [A, AB, ABC, ... AB..Z]
         let full_trip_matrix = &start_to_x_trips[fp_len - 1];
-
-        // TODO: here's where we need to change code
-        // - Multiply tr of each matrix by solution space to get needed input superset.
-        let valid_solution_supersets: Vec<HashSet<Vec<u8>>> = todo!();
+        let solving_inputs: Vec<HashSet<usize>> =
+                calculate_solving_inputs(&start_to_x_trips, &solution_idxs);
+        event!(Level::INFO, "solving_inputs: {:?}", solving_inputs);
+        event!(Level::TRACE, "full_trip_matrix: {}", full_trip_matrix);
+        event!(Level::INFO, "solution_idxs: {:?}", solution_idxs);
+        event!(Level::INFO, "start_idxs: {:?}", start_idxs);
         // fn generate new_inputs
         // while { let (new_inputs, rotation) = generate_new_inputs(new_inputs.last()); let found = valid_solution_supersets.iter().find(|sol| sol.contains(new_inputs));  match
         // found {None => pass, Some(inp) =>}}
@@ -141,6 +144,75 @@ pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
         event!(Level::INFO, "total_trips: {}", total_trips);
 
         Ok(total_trips)
+}
+
+/// Converts a list of indices into a vector of 0s and 1s.
+/// 1s are placed at the indices specified in `solution_idxs`.
+fn convert_indices_to_vector(solution_idxs: &[usize], max_size: usize) -> DVector<u8> {
+        let mut vector = DVector::from_element(max_size, 0u8);
+
+        for &idx in solution_idxs {
+                if idx < max_size {
+                        vector[idx] = 1;
+                }
+        }
+
+        vector
+}
+
+/// Calculates the inputs that will generate the entire set of solutions for a group of matrices.
+///
+/// # Warning:
+/// This function assumes:
+/// 1. Matrices are square.
+/// 2. Matrices are 1,0 matrices.
+/// 3. Matrices have a *single* 1 per column. (i.e. a single path from each node.)
+///
+/// # Examples
+///
+/// ```
+/// # use nalgebra::DMatrix;
+/// # use std::collections::HashSet;
+/// # use day_08::part2_lib::calculate_solving_inputs; // Replace `your_crate` with the name of your crate
+/// let matrices = vec![
+///     DMatrix::from_row_slice(3, 3, &[
+///         0, 1, 0,
+///         1, 0, 0,
+///         0, 0, 1,
+///     ]),
+///     DMatrix::from_row_slice(3, 3, &[
+///         1, 0, 0,
+///         0, 1, 0,
+///         0, 0, 1,
+///     ]),
+/// ];
+/// let solution_idxs = vec![1, 2];
+/// let solving_inputs = calculate_solving_inputs(&matrices, &solution_idxs);
+/// let expected = vec![
+///     HashSet::from([0, 2]),
+///     HashSet::from([1, 2]),
+/// ];
+/// assert_eq!(solving_inputs, expected);
+/// ```
+pub fn calculate_solving_inputs(
+        matrices: &[DMatrix<u8>],
+        solution_idxs: &Vec<usize>,
+) -> Vec<HashSet<usize>> {
+        let solution_vector = convert_indices_to_vector(&solution_idxs, matrices[0].ncols());
+        let result: Vec<HashSet<usize>> = matrices
+                .iter()
+                .map(|mat| {
+                        let transposed_mat = mat.transpose();
+                        let result = &transposed_mat * &solution_vector;
+
+                        // Collect indices of ones
+                        result.iter()
+                                .enumerate()
+                                .filter_map(|(idx, &val)| if val == 1 { Some(idx) } else { None })
+                                .collect::<HashSet<usize>>()
+                })
+                .collect();
+        result
 }
 
 fn dirs_to_paths(
