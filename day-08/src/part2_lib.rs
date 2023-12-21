@@ -122,7 +122,7 @@ pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
                 current_invec = full_trip * &previous_invec;
                 current_input = find_ones_indices(&current_invec);
                 rotations += 1;
-                event!(Level::TRACE, rotations);
+                event!(Level::DEBUG, rotations);
                 event!(Level::TRACE, "current input_vec: {}", current_invec);
         }
         event!(
