@@ -91,14 +91,6 @@ pub mod graph_components {
                 }
         }
 
-        // TODO:
-        // Collect all RawGraph Components.
-        // Extract all Nodes into Vec.  Use Vec to defined Node indices and define Graph Matrix.
-        // - Verify Input and Output Nodes are equivalent sets.
-        // - Verify AAA & ZZZ positions are as expected (0, nodes.len()-1)
-        // - Create two Graph Matrices (one for each direction)
-        // NOTE: AAA -> 0 & ZZZ -> nodes.len()-1; so we shouldn't need to search by Node name.
-
         /// Rather messy construction of a couple Graph Matrices.
         pub fn process_components(input_lines: Vec<&[u8]>) -> (DMatrix<u8>, DMatrix<u8>) {
                 let components: Vec<RawGraphComponent> = input_lines
@@ -173,17 +165,13 @@ pub mod graph_components {
 
                 // Populate matrices
                 for comp in components {
+                        // NOTE: unlike `parser1` we are not short-circuiting the "ZZZ" path here.
                         let input_idx = node_indices[&comp.input];
-                        // ZZZ Special case (always goes to itself)
-                        if comp.input == [b'Z', b'Z', b'Z'] {
-                                left_matrix[(input_idx, input_idx)] = 1;
-                                right_matrix[(input_idx, input_idx)] = 1;
-                        } else {
-                                let left_idx = node_indices[&comp.left_output];
-                                let right_idx = node_indices[&comp.right_output];
-                                left_matrix[(left_idx, input_idx)] = 1;
-                                right_matrix[(right_idx, input_idx)] = 1;
-                        }
+                        let left_idx = node_indices[&comp.left_output];
+                        let right_idx = node_indices[&comp.right_output];
+
+                        left_matrix[(left_idx, input_idx)] = 1;
+                        right_matrix[(right_idx, input_idx)] = 1;
                 }
 
                 (left_matrix, right_matrix)
