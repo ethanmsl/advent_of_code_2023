@@ -1,5 +1,6 @@
 //! Library code for Part 2 of Day 08 of Advent of Code 2023.
 //! `bin > part2.rs` will run this code along with conent of `input2.txt`
+#![allow(warnings)]
 
 use crate::parser2::path_input::Direction as D;
 use crate::{custom_error::AocErrorDay08, parser2::process_input};
@@ -94,10 +95,11 @@ use tracing::{event, Level};
 pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
         event!(Level::INFO, "Hiii. from  day-08 Part2! :)");
         let (dirs, (l_mat, r_mat), (start_idxs, solution_idxs)) = process_input(input);
-        event!(Level::INFO, "dirs: {:?}", dirs);
+        let fp_len = dirs.len();
+        event!(Level::INFO, fp_len);
+        event!(Level::DEBUG, "dirs: {:?}", dirs);
         event!(Level::TRACE, "l_mat: {}", l_mat);
         event!(Level::TRACE, "r_mat: {}", r_mat);
-        let fp_len = dirs.len();
 
         // Basic matrix multiplication, giving us input to n steps output maps at each step
         let start_to_x_trips = dirs_to_paths(&dirs, (&l_mat, &r_mat));
