@@ -61,14 +61,15 @@ pub fn process_input(
 
 pub mod graph_components {
         use super::*;
+        // NOTE: we're expanding the regex only to accomodate the test case
         const GRAPH_COMPONENT: &str = r"(?x)
-                (?<inp>[A-Z]{3})       ## 3 capital char input node
+                (?<inp>[A-Z0-9]{3})       ## 3 capital char input node
                 \s = \s \(             # ' = ('
 
-                (?<l_out>[A-Z]{3})    ## 3 capital char leftward output node
+                (?<l_out>[A-Z0-9]{3})    ## 3 capital char leftward output node
                 , \s                  # ', '
 
-                (?<r_out>[A-Z]{3})    ## 3 capital char leftward output node
+                (?<r_out>[A-Z0-9]{3})    ## 3 capital char leftward output node
                 \)                    # ')'
         "; // note: `(?x)` enables "verbose mode" for regex string, where whitespace is ignored
 
@@ -102,6 +103,7 @@ pub mod graph_components {
         pub fn process_components(
                 input_lines: Vec<&[u8]>,
         ) -> ((DMatrix<u8>, DMatrix<u8>), (Vec<usize>, Vec<usize>)) {
+                event!(Level::DEBUG, "Parsing Graph Components");
                 let components: Vec<RawGraphComponent> = input_lines
                         .into_iter()
                         .map(parse_raw_graph_component)
