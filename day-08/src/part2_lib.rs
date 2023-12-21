@@ -92,7 +92,7 @@ use tracing::{event, Level};
 ///
 #[tracing::instrument(skip(input))]
 pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
-        event!(Level::INFO, "Hiii. from  day-08 Part1! :)");
+        event!(Level::INFO, "Hiii. from  day-08 Part2! :)");
         let (dirs, (l_mat, r_mat), (start_idxs, solution_idxs)) = process_input(input);
         event!(Level::INFO, "dirs: {:?}", dirs);
         event!(Level::TRACE, "l_mat: {}", l_mat);
