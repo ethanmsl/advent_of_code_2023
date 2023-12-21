@@ -75,6 +75,13 @@ use tracing::{event, Level};
 /// this would probably be a great case for it. -- It would just have to have some state store and
 /// check somewhere... not sure how ergonomic the NFA version would be, but prob fine.)
 ///
+/// NOTE: 2 -- regex-automata does *not* have a nice way of constructing machines from states.
+/// I did have some fun putting together a nice algorithm for constructing Languages from Machines.
+/// So I could make an automaton that way.  (And it would be fun to implement the algorithim
+/// anyway.  It works nicely with a graph based representaiton of network.)
+/// But even then there does not seem to be a straightforwad way to apply the exisitn gregex crate
+/// to bits or arbitrary enums.  And then there's the issue of simulating a circular pull on the
+/// input stream.
 ///
 /// (Incidentally, at first this was sounding like an NFA style problem, but it's not
 /// , but classic NFA wouldn't have the states aware of one another.  Though, implementaiton wise,
@@ -91,25 +98,12 @@ pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
         event!(Level::TRACE, "r_mat: {}", r_mat);
         let fp_len = dirs.len();
 
-        // Basic matrix multiplication
-        let trips = dirs
-                .iter()
-                .map(|dir| match dir {
-                        D::Left => &l_mat,
-                        D::Right => &r_mat,
-                })
-                .scan(
-                        nalgebra::DMatrix::identity(l_mat.nrows(), l_mat.ncols()),
-                        |acc, mat| {
-                                let new_mat = mat * &*acc;
-                                *acc = new_mat.clone();
-                                Some(new_mat)
-                        },
-                )
-                .collect::<Vec<_>>();
+        // Basic matrix multiplication, giving us input to n steps output maps at each step
+        let start_to_x_trips = dirs_to_paths(&dirs, (&l_mat, &r_mat));
+
         #[cfg(debug_assertions)]
         {
-                for (id, mat) in trips.iter().enumerate() {
+                for (id, mat) in start_to_x_trips.iter().enumerate() {
                         event!(
                                 Level::TRACE,
                                 "\nmat[{}]: dirs[0..=id]: {:?} \n {}",
@@ -120,7 +114,10 @@ pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
                 }
         }
 
-        let full_trip_matrix = &trips[fp_len - 1];
+        let full_trip_matrix = &start_to_x_trips[fp_len - 1];
+
+        // TODO: here's where we need to change code
+        // - Multiply tr of each matrix by solution space to get needed input superset.
         let (ub, final_start_idx) =
                 get_upper_bound(full_trip_matrix, 100).expect("no upperbound solution found");
         event!(
@@ -130,13 +127,36 @@ pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
                 fp_len,
                 final_start_idx,
         );
-        let remainder_trips =
-                get_trips_to_end(&trips, final_start_idx).expect("no remainder solution found");
+        let remainder_trips = get_trips_to_end(&start_to_x_trips, final_start_idx)
+                .expect("no remainder solution found");
         let total_trips = (ub - 1) * dirs.len() + remainder_trips + 1;
         event!(Level::INFO, "remainder_trips: {}", remainder_trips);
         event!(Level::INFO, "total_trips: {}", total_trips);
 
         Ok(total_trips)
+}
+
+fn dirs_to_paths(
+        directions_vec: &[D],
+        path_choices: (&DMatrix<u8>, &DMatrix<u8>),
+) -> Vec<DMatrix<u8>> {
+        let (l_mat, r_mat) = path_choices;
+
+        directions_vec
+                .iter()
+                .map(|dir| match dir {
+                        D::Left => l_mat,
+                        D::Right => r_mat,
+                })
+                .scan(
+                        nalgebra::DMatrix::identity(l_mat.nrows(), l_mat.ncols()),
+                        |acc, mat| {
+                                let new_mat = mat * &*acc;
+                                *acc = new_mat.clone();
+                                Some(new_mat)
+                        },
+                )
+                .collect::<Vec<_>>()
 }
 /// Returns the upper bound on the number of complete trips to get a solution and index to start at
 fn get_upper_bound(mat: &DMatrix<u8>, some_reasonable_limit: usize) -> Option<(usize, usize)> {
