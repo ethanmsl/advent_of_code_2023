@@ -93,7 +93,7 @@ impl Hand {
         }
 }
 
-// #[tracing::instrument]
+#[tracing::instrument(skip(input))]
 pub fn process(input: &str) -> Result<u64> {
         event!(Level::INFO, "Hiii. from  day-07 Part1! :)");
         let mut hands: Vec<Hand> = Token::lexer(input)
