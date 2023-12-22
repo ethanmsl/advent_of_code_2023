@@ -1,5 +1,5 @@
 //! Part 2 of Day 08 for Advent of Code 2023.
-//! Runs `part2_lib.rs` library code against `input2.txt`
+//! Runs `part2_lib_numtheory.rs` library code against `input2.txt`
 
 use day_08::part2_lib_numtheory::process;
 use miette::{Context, Result};
