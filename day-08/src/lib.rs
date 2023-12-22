@@ -9,4 +9,5 @@ pub mod parser1;
 pub mod parser2;
 
 pub mod part1_lib;
-pub mod part2_lib;
+pub mod part2_lib_numtheory;
+pub mod part2_lib_rawmatrix;

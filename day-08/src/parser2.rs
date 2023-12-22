@@ -38,6 +38,8 @@ use regex::bytes;
 use std::collections::{HashMap, HashSet};
 use tracing::{event, Level};
 
+/// Translate string input into internal objects of interest.
+#[allow(clippy::type_complexity)]
 pub fn process_input(
         input: &str,
 ) -> (
@@ -100,6 +102,7 @@ pub mod graph_components {
         }
 
         /// Rather messy construction of a couple Graph Matrices.
+        #[allow(clippy::type_complexity)]
         pub fn process_components(
                 input_lines: Vec<&[u8]>,
         ) -> ((DMatrix<u8>, DMatrix<u8>), (Vec<usize>, Vec<usize>)) {

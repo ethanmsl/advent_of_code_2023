@@ -138,21 +138,21 @@ use tracing::{event, Level};
 ///  Sooooo, this is all very doable... but numerics solving with Rust sounds terrible...
 ///
 /// As an exercise, check, lets see how we can visualize non-allignable components:
-///
-///     Note: to have all offsets align we'd need len1 * len2 distance
-///          That is a full copy of a sequence for each element of it's opposite.
-///          At an extreme (e.g. 3 & 3) there is only one copy for each element and so offsets will always be aligned.
-///
-///          In our case below we have 2:5 ratio. we'd need an 8:20 ratio to get arbirary alignment.
-///          So we get 1/4 of conceivable alignments.
-///     
-///     Note: there are *no* repeats.
-///            But we re-index (so to speak) into the larger sequency with an offset
-///            of shared prime times (4, in this case)
-///     All offsetmatches f1 + len1 a = f2 + len2 b -->
-///         Therefore the offset difference
-///      0      7       15      23      31     
-///      0      7       I5      3       11
+/// |
+/// |   Note: to have all offsets align we'd need len1 * len2 distance
+/// |        That is a full copy of a sequence for each element of it's opposite.
+/// |        At an extreme (e.g. 3 & 3) there is only one copy for each element and so offsets will always be aligned.
+/// |
+/// |        In our case below we have 2:5 ratio. we'd need an 8:20 ratio to get arbirary alignment.
+/// |        So we get 1/4 of conceivable alignments.
+/// |   
+/// |   Note: there are *no* repeats.
+/// |          But we re-index (so to speak) into the larger sequency with an offset
+/// |          of shared prime times (4, in this case)
+/// |   All offsetmatches f1 + len1 a = f2 + len2 b -->
+/// |       Therefore the offset difference
+/// |    0      7       15      23      31     
+/// |    0      7       I5      3       11
 /// sol1 -------I-------I---|-------------------|  20 :. 2,2 ,5
 /// sol2 -------|-------|-------|-------|-------|   8 :. 2,2 ,2
 ///      0      7       15  19  23      31      
@@ -243,7 +243,7 @@ fn convert_indices_to_vector(idxs: &[usize], max_size: usize) -> DVector<u8> {
 /// ```
 /// # use nalgebra::DMatrix;
 /// # use std::collections::HashSet;
-/// # use day_08::part2_lib::calculate_solving_inputs;
+/// # use day_08::part2_lib_rawmatrix::calculate_solving_inputs;
 /// let matrices = vec![
 ///     DMatrix::from_row_slice(3, 3, &[
 ///         0, 1, 0,
