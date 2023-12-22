@@ -31,6 +31,7 @@
 // #![allow(warnings)]
 
 use derive_more::Constructor;
+use derive_more::IsVariant;
 use nalgebra::DMatrix;
 use once_cell::sync::Lazy;
 use path_input::*;
@@ -238,7 +239,7 @@ pub mod path_input {
 
         /// Two States of Direction
         /// (Each corresponding to a different Graph Matrix)
-        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, IsVariant)]
         pub enum Direction {
                 Left,
                 Right,
