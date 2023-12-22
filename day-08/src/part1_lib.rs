@@ -106,6 +106,7 @@ pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
                         },
                 )
                 .collect::<Vec<_>>();
+
         #[cfg(debug_assertions)]
         {
                 for (id, mat) in trips.iter().enumerate() {
