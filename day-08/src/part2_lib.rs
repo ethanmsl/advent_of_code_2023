@@ -243,7 +243,7 @@ fn convert_indices_to_vector(idxs: &[usize], max_size: usize) -> DVector<u8> {
 /// ```
 /// # use nalgebra::DMatrix;
 /// # use std::collections::HashSet;
-/// # use day_08::part2_lib::calculate_solving_inputs; // Replace `your_crate` with the name of your crate
+/// # use day_08::part2_lib::calculate_solving_inputs;
 /// let matrices = vec![
 ///     DMatrix::from_row_slice(3, 3, &[
 ///         0, 1, 0,
