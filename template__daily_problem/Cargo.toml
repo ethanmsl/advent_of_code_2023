@@ -20,6 +20,7 @@ tracing-subscriber = { workspace = true }
 # ...
 # Parsing
 logos = { workspace = true }
+nom-supreme = { workspace = true }
 regex = { workspace = true }
 regex-automata = { workspace = true }
 # Performance
@@ -27,18 +28,16 @@ once_cell = { workspace = true }
 rayon = { workspace = true }
 # Profiling
 dhat = { workspace = true }
-divan = { workspace = true }
-# tracing-tracy = { workspace = true }
-# tracy-client = { workspace = true }
-# tracy-client-sys = { workspace = true }
-# Testing
-test-case = { workspace = true }
 
 [dev-dependencies]
+# Profiling
 divan = { workspace = true }
+# Testing
+rstest = { workspace = true }
+test-case = { workspace = true }
 
 [[bench]]
-name = "{{project-name}}"
+name = "{{project-name}}-bench"
 path = "benches/benchmarks.rs"
 harness = false
 
