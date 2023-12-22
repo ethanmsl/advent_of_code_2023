@@ -92,6 +92,71 @@ use tracing::{event, Level};
 /// regex-automata crate: basically using a multi pattern (with pattern offsets) I *think* you
 /// could get that info out.  [though not sure])
 ///
+/// Hmm.  Alright.  Our code is not fast enough for what we're doing.
+/// We could speed it up by using sparce matrices.  (And look harder for bit elements.)
+/// We can also take advantage of the fact that each input only has side_len * dir_len
+/// Unique input:output matchings, for single inputs.
+/// **And our MODEL** is that each input is independently searching for a solution.
+/// So we can say, start0, start1, start2, ...by(x) A, AB, ABC, ....
+/// And for the small price of < 3e5 (300k) multiplications we will have ALL the
+/// solutions that are possible.  We can then winnow that down for valid solutions.
+/// (either convert to numbers and search hash set or multiply by solution set and sum
+/// and check for equality -- either way)
+/// Then ... this sucks without paper
+///
+/// Hmm ... each solution can only have at most side_len number of unique full rotations
+/// e.g. as soon as a full rotation hits an old input it will cycle
+/// and there are only 726 or so such inputs
+/// so.  we can (1) find the number of unique rotations for each.
+/// then b find the ouputs for those rotations
+/// From that -- we will get:
+/// sol1 --------X-------X---(20) prime_decomp: 2,2,5    offsets: 8, 16
+/// sol2 --X-----(8) prime_decomp: 2,2,2   offsets: 2
+/// sol3 ---------------------X-------X---(33) prime_decomp: 3, 11  offsets: 21, 29
+/// sol4 --XX-X----(10) prime_decomp: 2, 5  offsets: 2,3,5
+///
+/// From this, we can do some math and figure out when these guys overlap
+/// Notably:
+///  - to warm up: sol1 & sol2 ... will repeate overlap every 2|5 times (so 40 length)
+///      - the smallest shared prime decomp we can make from them, without breaking
+///  - So how do offsets work...  there're only 2:5 ratio before repition here; not all offsets will be valid, which would require 1:8
+///      - quick guess, we lose the shared prime overlap of (2,2)
+///      0       8       16          28      36 39
+/// sol1 -Y------X-------X--|-Y------X-------X--|
+/// sol2 --X--Y-|--X--Y-|--X--Y-|--X--Y-|--X--Y-|
+///      0 2       10      18      26      34   39
+///
+/// So, some quick maths [offset] + len * (0..reps) is the total number of offsets
+/// we're ... uhoh, adding,so our pretty prime number maths are a bit harder
+/// But we can solve this ... 2+8a  =?  8+20b --> 4a-10b =? 3  -->    a:[0..5) b:[0..2)
+///                           2+8a  =? 16+20b --> 4a-10b =? 7  -->
+///                                               Note: 4 & 10 share a prime factor
+///                                                     so *ANY* solution of them must share that factor
+///                                                     so we know there is no solution to the above two problems
+/// I've added a manufactured solution (Y)
+///                           5+8a  =?  1+20b --> 4 =? 20b-8a --> 1 = 5b-2a @ (2,1)
+///  Sooooo, this is all very doable... but numerics solving with Rust sounds terrible...
+///
+/// As an exercise, check, lets see how we can visualize non-allignable components:
+///
+///     Note: to have all offsets align we'd need len1 * len2 distance
+///          That is a full copy of a sequence for each element of it's opposite.
+///          At an extreme (e.g. 3 & 3) there is only one copy for each element and so offsets will always be aligned.
+///
+///          In our case below we have 2:5 ratio. we'd need an 8:20 ratio to get arbirary alignment.
+///          So we get 1/4 of conceivable alignments.
+///     
+///     Note: there are *no* repeats.
+///            But we re-index (so to speak) into the larger sequency with an offset
+///            of shared prime times (4, in this case)
+///     All offsetmatches f1 + len1 a = f2 + len2 b -->
+///         Therefore the offset difference
+///      0      7       15      23      31     
+///      0      7       I5      3       11
+/// sol1 -------I-------I---|-------------------|  20 :. 2,2 ,5
+/// sol2 -------|-------|-------|-------|-------|   8 :. 2,2 ,2
+///      0      7       15  19  23      31      
+///      0      0       0   3   0       0
 #[tracing::instrument(skip(input))]
 pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
         let (dirs, (l_mat, r_mat), (start_idxs, solution_idxs)) = process_input(input);
