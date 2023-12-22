@@ -203,7 +203,7 @@ mod tests {
 
         #[test]
         fn test_process_example_1() -> Result<()> {
-                tracing_subscriber::fmt::init();
+                // tracing_subscriber::fmt::init();
 
                 let input = indoc! {"
                         RL
@@ -223,7 +223,7 @@ mod tests {
 
         #[test]
         fn test_process_example_2() -> Result<()> {
-                tracing_subscriber::fmt::init();
+                // tracing_subscriber::fmt::init();
 
                 let input = indoc! {"
                         LLR
