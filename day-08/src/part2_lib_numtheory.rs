@@ -19,18 +19,11 @@ use tracing::{event, Level};
 ///
 /// # Example:
 /// L, LR, LRL, LRLL, ...
-#[derive(Debug, Constructor, Index, Display, IntoIterator)]
-#[display(
-        fmt = "mats: (note shown) number of matrices: {} matrix side length (square): {}",
-        num_mats,
-        square_side_len
-)]
+#[derive(Debug, Constructor, Index, IntoIterator)]
 struct TransitionMatrices {
         #[index]
         #[into_iterator(ref)]
         mats: Vec<DMatrix<u8>>,
-        num_mats: usize,
-        square_side_len: usize,
 }
 impl TransitionMatrices {
         /// Convenience Method to get last matrix in transiton series, which represents a complete
@@ -40,10 +33,19 @@ impl TransitionMatrices {
                         .last()
                         .expect("transition matrices to have been calculated")
         }
+
+        /// Convenience method to get number of matrices in the transition series.
+        /// (== number of directions in input)
+        fn num_mats(&self) -> usize {
+                self.mats.len()
+        }
+        fn square_side_len(&self) -> usize {
+                self.mats[0].nrows()
+        }
 }
 
 /// Core Seed Info for the Problem
-#[derive(Display, IntoIterator, Debug, Index)]
+#[derive(Constructor, Display, IntoIterator, Debug, Index)]
 #[display(
         fmt = "start idxs: {:?}, solution_idxs: {:?},\ndirections {:?},\nl_graph: {},\nr_graph: {}]",
         start_idxs,
@@ -167,34 +169,36 @@ impl IndependentPath {
 ///      0      0       0   3   0       0
 #[tracing::instrument(skip(input))]
 pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
-        let (dirs, (l_mat, r_mat), (start_idxs, solution_idxs)) = process_input(input);
-        event!(Level::TRACE, "directions: {:?}", dirs);
-        event!(Level::INFO, "start idxs: {:?}", start_idxs);
-        event!(Level::INFO, "solution_idxs: {:?}", solution_idxs);
-        // [A, AB, ABC, ... AB..Z]
-        let zero_to_n_transitions = dirs_to_paths(&dirs, (&l_mat, &r_mat));
+        let prob = {
+                let (dirs, (l_mat, r_mat), (start_idxs, solution_idxs)) = process_input(input);
+                ProblemSpecifics::new(dirs, start_idxs, solution_idxs, l_mat, r_mat)
+        };
+        let transitions = {
+                let trans_mats = dirs_to_paths(&prob.directions, (&prob.l_graph, &prob.r_graph));
+                TransitionMatrices::new(trans_mats)
+        };
+
         #[cfg(debug_assertions)]
         {
-                for (id, mat) in zero_to_n_transitions.iter().enumerate() {
+                for (id, mat) in transitions.mats.iter().enumerate() {
+                        event!(Level::TRACE, "directions: {:?}", prob.directions);
+                        event!(Level::INFO, "start idxs: {:?}", prob.start_idxs);
+                        event!(Level::INFO, "solution_idxs: {:?}", prob.solution_idxs);
                         event!(
                                 Level::TRACE,
                                 "\nmat[{}]: dirs[0..=id]: {:?} \n {}",
                                 id,
-                                dirs[0..=id].iter().collect::<Vec<_>>(),
+                                prob.directions[0..=id].iter().collect::<Vec<_>>(),
                                 mat,
                         );
                 }
         }
 
-        let num_nodes = l_mat.nrows();
-        let directions_len = dirs.len();
-        let full_transition = &zero_to_n_transitions[directions_len - 1];
-
         // all inpts idx that create solutions for each 0-to-n transition matrix
         let solving_idx_sets: Vec<HashSet<usize>> =
-                calculate_solving_inputs(&zero_to_n_transitions, &solution_idxs);
-        event!(Level::INFO, num_nodes);
-        event!(Level::INFO, "solution_idxs: {:?}", solution_idxs);
+                calculate_solving_inputs(&transitions.mats, &prob.solution_idxs);
+        event!(Level::INFO, "{}", prob.dir_len());
+        event!(Level::INFO, "solution_idxs: {:?}", prob.solution_idxs);
         event!(Level::INFO, "solving_idx_sets: {:?}", solving_idx_sets);
 
         // NOTE: start idxs:    [629, 347, 85, 105, 510,  0]
