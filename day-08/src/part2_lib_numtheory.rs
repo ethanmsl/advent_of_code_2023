@@ -25,14 +25,14 @@ use tracing::{event, Level};
         num_mats,
         square_side_len
 )]
-struct TransMats {
+struct TransitionMatrices {
         #[index]
         #[into_iterator(ref)]
         mats: Vec<DMatrix<u8>>,
         num_mats: usize,
         square_side_len: usize,
 }
-impl TransMats {
+impl TransitionMatrices {
         /// Convenience Method to get last matrix in transiton series, which represents a complete
         /// 'rotation' through the direction series.
         fn full_trans_mat(&self) -> &DMatrix<u8> {
@@ -100,12 +100,12 @@ impl ProblemSpecifics {
         full_cycle_node_offset_path,
         full_cycle_node_cycle_path
 )]
-struct InitBag {
+struct IndependentPath {
         start_id: usize, // will match an element of ProblemSpecifics.start_idxs
         full_cycle_node_offset_path: Vec<usize>,
         full_cycle_node_cycle_path: Vec<usize>,
 }
-impl InitBag {
+impl IndependentPath {
         /// Convenience method to get id
         fn id(&self) -> usize {
                 self.start_id
