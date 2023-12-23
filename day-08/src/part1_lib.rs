@@ -3,7 +3,7 @@
 
 use crate::parser1::path_input::Direction as D;
 use crate::{custom_error::AocErrorDay08, parser1::process_input};
-use miette::Result;
+use anyhow::Result;
 use nalgebra::DMatrix;
 use tracing::{event, Level};
 

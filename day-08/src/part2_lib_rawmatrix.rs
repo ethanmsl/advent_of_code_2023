@@ -4,7 +4,7 @@
 
 use crate::parser2::path_input::Direction as D;
 use crate::{custom_error::AocErrorDay08, parser2::process_input};
-use miette::Result;
+use anyhow::Result;
 use nalgebra::{DMatrix, DVector};
 use rayon::prelude::*;
 use std::collections::HashSet;
