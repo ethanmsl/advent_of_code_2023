@@ -5,9 +5,9 @@
 use crate::parser2::path_input::Direction as D;
 use crate::{custom_error::AocErrorDay08, parser2::process_input}; // Note: we use the same parser
                                                                   // here.
+use anyhow::{Context, Result};
 use derive_more::{Constructor, Display, Index, IntoIterator};
 use itertools::Itertools;
-use miette::Result;
 use nalgebra::{DMatrix, DVector};
 use rayon::prelude::*;
 use std::collections::HashSet;
@@ -17,13 +17,26 @@ use tracing::{event, Level};
 /// Each matrix represents a progressively longer transition acording to problem directions
 /// Therefore each matrix takes the same starting information.
 ///
+/// # Structure
+/// - mats: Vec<DMatrix<u8>>,
+///     - full_trans_mat: &Dmatrix<u8>
+///     - num_mats: usize
+///     - square_side_len: usize
+/// - solutions: Option<HashSet<usize>>,
+///
 /// # Example:
-/// L, LR, LRL, LRLL, ...
-#[derive(Debug, Constructor, Index, IntoIterator)]
+/// - L, LR, LRL, LRLL, ..., LRLLRRRR
+///     - LRLLRRRR
+///     - 22
+///     - 304
+/// - <0,12>, <>, <89>, ..., <7, 303>
+///
+#[derive(Debug, Index, IntoIterator)]
 struct TransitionMatrices {
         #[index]
         #[into_iterator(ref)]
         mats: Vec<DMatrix<u8>>,
+        solutions: Vec<HashSet<usize>>,
 }
 impl TransitionMatrices {
         /// Convenience Method to get last matrix in transiton series, which represents a complete
@@ -33,18 +46,35 @@ impl TransitionMatrices {
                         .last()
                         .expect("transition matrices to have been calculated")
         }
-
         /// Convenience method to get number of matrices in the transition series.
         /// (== number of directions in input)
         fn num_mats(&self) -> usize {
                 self.mats.len()
         }
+        /// Convenience method to get the side length of a matrix.
+        /// (All matrices being the same size here.)
+        /// Note: side length of a matrix == number of nodes in the input graph.
         fn square_side_len(&self) -> usize {
                 self.mats[0].nrows()
+        }
+        /// Create TransitionsMatrices Structure
+        /// Uses matrix and known solution idxs to populate itself.
+        /// (Consumes Matrix)
+        fn new(mats: Vec<DMatrix<u8>>, solution_idxs: &Vec<usize>) -> Self {
+                let solutions = calculate_solving_inputs(&mats, solution_idxs);
+                TransitionMatrices { mats, solutions }
         }
 }
 
 /// Core Seed Info for the Problem
+///
+/// # Structure
+/// - directions: Vec<D>,
+///     - .dir_len(): usize
+/// - start_idxs: Vec<usize>,
+/// - solution_idxs: Vec<usize>,
+/// - l_graph: DMatrix<u8>,
+/// - r_graph: DMatrix<u8>,
 #[derive(Constructor, Display, IntoIterator, Debug, Index)]
 #[display(
         fmt = "start idxs: {:?}, solution_idxs: {:?},\ndirections {:?},\nl_graph: {},\nr_graph: {}]",
@@ -78,6 +108,13 @@ impl ProblemSpecifics {
 /// This means that at anypoint in the directions series, we *must* repeat ourselves after
 /// node.len() (or fewer) steps.
 ///
+/// # Structure
+/// - start_id: usize, // will match an element of ProblemSpecifics.start_idxs
+///     - .id(): usize
+/// - full_cycle_node_offset_path: Vec<usize>,
+/// - full_cycle_node_cycle_path: Vec<usize>,
+/// - solution_absolute_offsets: Vec<usize>,
+///
 /// e.g.
 /// if Dirs are: [L, R, L]
 /// Then a Full Cycle is LRL
@@ -104,13 +141,26 @@ impl ProblemSpecifics {
 )]
 struct IndependentPath {
         start_id: usize, // will match an element of ProblemSpecifics.start_idxs
-        full_cycle_node_offset_path: Vec<usize>,
-        full_cycle_node_cycle_path: Vec<usize>,
+        full_cycle_node_offset_path: Option<Vec<usize>>,
+        full_cycle_node_cycle_path: Option<Vec<usize>>,
+        solution_absolute_offsets: Option<Vec<usize>>,
 }
 impl IndependentPath {
         /// Convenience method to get id
         fn id(&self) -> usize {
                 self.start_id
+        }
+        /// Setter for full_cycle_node_offset_path
+        fn set_full_cycle_node_offset_path(&mut self, path: Vec<usize>) {
+                self.full_cycle_node_offset_path = Some(path);
+        }
+        /// Setter for full_cycle_node_cycle_path
+        fn set_full_cycle_node_cycle_path(&mut self, path: Vec<usize>) {
+                self.full_cycle_node_cycle_path = Some(path);
+        }
+        /// Setter for solution_absolute_offsets
+        fn set_solution_absolute_offsets(&mut self, path: Vec<usize>) {
+                self.solution_absolute_offsets = Some(path);
         }
 }
 
@@ -168,15 +218,22 @@ impl IndependentPath {
 ///      0      7       15  19  23      31      
 ///      0      0       0   3   0       0
 #[tracing::instrument(skip(input))]
-pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
+pub fn process(input: &str) -> Result<usize> {
         let prob = {
                 let (dirs, (l_mat, r_mat), (start_idxs, solution_idxs)) = process_input(input);
                 ProblemSpecifics::new(dirs, start_idxs, solution_idxs, l_mat, r_mat)
         };
         let transitions = {
                 let trans_mats = dirs_to_paths(&prob.directions, (&prob.l_graph, &prob.r_graph));
-                TransitionMatrices::new(trans_mats)
+                TransitionMatrices::new(trans_mats, &prob.solution_idxs)
         };
+        let mut paths: Vec<IndependentPath> = {
+                prob.start_idxs
+                        .iter()
+                        .map(|id| IndependentPath::new(*id, None, None, None))
+                        .collect()
+        };
+        // all inpts idx that create solutions for each 0-to-n transition matrix
 
         #[cfg(debug_assertions)]
         {
@@ -194,12 +251,9 @@ pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
                 }
         }
 
-        // all inpts idx that create solutions for each 0-to-n transition matrix
-        let solving_idx_sets: Vec<HashSet<usize>> =
-                calculate_solving_inputs(&transitions.mats, &prob.solution_idxs);
         event!(Level::INFO, "{}", prob.dir_len());
         event!(Level::INFO, "solution_idxs: {:?}", prob.solution_idxs);
-        event!(Level::INFO, "solving_idx_sets: {:?}", solving_idx_sets);
+        event!(Level::INFO, "solving_idx_sets: {:?}", transitions.solutions);
 
         // NOTE: start idxs:    [629, 347, 85, 105, 510,  0]
         //     , solution_idxs: [725, 561, 73, 589, 291, 36]
@@ -234,60 +288,60 @@ pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
         // Suggests a bug in earlier code if true. (As I've done quite a bit more than that.)
         // WARNING: I forgot to account for an offset before cycling starts!
         // I need time to start cycle, and then cycle
-        let sol_cycles: Vec<(Vec<usize>, Vec<usize>)> = start_idxs
-                .par_iter()
-                .map(|idx| trans_to_cycle(idx, &full_transition))
-                .collect();
-        // let sol_cycle_times: Vec<usize> = sol_cycles.iter().map(|cycle| cycle.len()).collect();
-        // event!(Level::DEBUG, "sol_cycles: {:?}", sol_cycles);
-        // event!(Level::INFO, "sol_cycle_times: {:?}", sol_cycle_times);
-        //
-        // // NEED: offsets for all solutions
-        // let sol_offsets: Vec<Vec<(usize, usize)>> = sol_cycles
-        //         .iter()
-        //         .map(|sol_cycle| {
-        //                 calculate_offsets(sol_cycle, &solution_idxs, &zero_to_n_transitions)
-        //         })
+        // let sol_cycles: Vec<(Vec<usize>, Vec<usize>)> = start_idxs
+        //         .par_iter()
+        //         .map(|idx| trans_to_cycle(idx, &full_transition))
         //         .collect();
-        // event!(Level::DEBUG, "sol_offsets: {:?}", sol_offsets);
-        todo!();
-
-        // loop through rotation outputs and see if any solve
-        let mut curr_inp_vec = convert_indices_to_vector(&start_idxs, num_nodes);
-        let mut curr_inp_idx_set = find_ones_indices(&curr_inp_vec);
-        let mut prev_inp_vec;
-        let mut found = None;
-        let mut rotations = 0;
-        loop {
-                found = solving_idx_sets
-                        .par_iter()
-                        .position(|sol| curr_inp_idx_set.is_subset(&sol));
-                if found.is_some() {
-                        break;
-                };
-                prev_inp_vec = curr_inp_vec;
-                curr_inp_vec = full_transition * &prev_inp_vec;
-                curr_inp_idx_set = find_ones_indices(&curr_inp_vec);
-                rotations += 1;
-                event!(Level::DEBUG, rotations);
-                event!(Level::TRACE, "current input_vec: {}", curr_inp_vec);
-        }
-        event!(
-                Level::WARN,
-                "found a solution at: {}_rots + 1+{:?}_steps",
-                rotations,
-                found
-        );
-
-        #[cfg(debug_assertions)]
-        {
-                event!(Level::INFO, "solving_inputs: {:?}", solving_idx_sets);
-                event!(Level::TRACE, "full_trip_matrix: {}", full_transition);
-                event!(Level::INFO, "solution_idxs: {:?}", solution_idxs);
-                event!(Level::INFO, "start_idxs: {:?}", start_idxs);
-        }
-
-        Ok(found.expect("should be Some if we got here") + 1 + rotations * directions_len)
+        // // let sol_cycle_times: Vec<usize> = sol_cycles.iter().map(|cycle| cycle.len()).collect();
+        // // event!(Level::DEBUG, "sol_cycles: {:?}", sol_cycles);
+        // // event!(Level::INFO, "sol_cycle_times: {:?}", sol_cycle_times);
+        // //
+        // // // NEED: offsets for all solutions
+        // // let sol_offsets: Vec<Vec<(usize, usize)>> = sol_cycles
+        // //         .iter()
+        // //         .map(|sol_cycle| {
+        // //                 calculate_offsets(sol_cycle, &solution_idxs, &zero_to_n_transitions)
+        // //         })
+        // //         .collect();
+        // // event!(Level::DEBUG, "sol_offsets: {:?}", sol_offsets);
+        // todo!();
+        //
+        // // loop through rotation outputs and see if any solve
+        // let mut curr_inp_vec = convert_indices_to_vector(&start_idxs, num_nodes);
+        // let mut curr_inp_idx_set = find_ones_indices(&curr_inp_vec);
+        // let mut prev_inp_vec;
+        // let mut found = None;
+        // let mut rotations = 0;
+        // loop {
+        //         found = solving_idx_sets
+        //                 .par_iter()
+        //                 .position(|sol| curr_inp_idx_set.is_subset(&sol));
+        //         if found.is_some() {
+        //                 break;
+        //         };
+        //         prev_inp_vec = curr_inp_vec;
+        //         curr_inp_vec = full_transition * &prev_inp_vec;
+        //         curr_inp_idx_set = find_ones_indices(&curr_inp_vec);
+        //         rotations += 1;
+        //         event!(Level::DEBUG, rotations);
+        //         event!(Level::TRACE, "current input_vec: {}", curr_inp_vec);
+        // }
+        // event!(
+        //         Level::WARN,
+        //         "found a solution at: {}_rots + 1+{:?}_steps",
+        //         rotations,
+        //         found
+        // );
+        //
+        // #[cfg(debug_assertions)]
+        // {
+        //         event!(Level::INFO, "solving_inputs: {:?}", solving_idx_sets);
+        //         event!(Level::TRACE, "full_trip_matrix: {}", full_transition);
+        //         event!(Level::INFO, "solution_idxs: {:?}", solution_idxs);
+        //         event!(Level::INFO, "start_idxs: {:?}", start_idxs);
+        // }
+        //
+        // Ok(found.expect("should be Some if we got here") + 1 + rotations * directions_len)
 }
 
 // start1 start2 start3
