@@ -7,7 +7,7 @@ _default:
 [no-cd]
 template-rg *INSIDE:
         @ echo "-- NOTE: this is run from calling directory; not justfile directory. --"
-        rg "\{\{.*{{INSIDE}}.*\}\}" --ignore-file justfile
+        rg "\{\{.*{{INSIDE}}.*\}\}"
 
 #TODO: failure, fix children first
 work day_digits part_digit:
