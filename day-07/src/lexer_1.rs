@@ -3,13 +3,12 @@ use logos::{Lexer, Logos};
 
 fn to_arr(lex: &mut Lexer<Token>) -> Option<[Card; 5]> {
         let slice = lex.slice();
-        let out = slice
-                .chars()
-                .enumerate()
-                .fold([Card::INIT; 5], |mut acc, (id, c)| {
-                        acc[id] = Card::from_char(&c).expect("bad parse");
-                        acc
-                });
+        let out = slice.chars()
+                       .enumerate()
+                       .fold([Card::INIT; 5], |mut acc, (id, c)| {
+                               acc[id] = Card::from_char(&c).expect("bad parse");
+                               acc
+                       });
         Some(out)
 }
 

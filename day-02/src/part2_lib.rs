@@ -1,8 +1,9 @@
 //! Library code for Part 2 of Day 02 of Advent of Code 2023.
 //! `bin > part2.rs` will run this code along with conent of `input2.txt`
 
-use crate::custom_error::AocErrorDay02;
 use anyhow::Result;
+
+use crate::custom_error::AocErrorDay02;
 
 /// Example helpfully provided by the `once_cell` crate's documentation.
 ///
@@ -38,9 +39,9 @@ const BLUE_PAT: &str = r"(\d+) blue";
 /// set of cubes
 #[derive(Debug, PartialEq)]
 struct Cubes {
-        red: u64,
+        red:   u64,
         green: u64,
-        blue: u64,
+        blue:  u64,
 }
 
 impl Cubes {
@@ -52,13 +53,12 @@ impl Cubes {
 
 #[tracing::instrument]
 pub fn process(input: &str) -> Result<u64, AocErrorDay02> {
-        let pows_sum = input
-                .lines()
-                .map(|line| {
-                        let line_cubes_maxes = extract_data_noid(line);
-                        line_cubes_maxes.pow_max()
-                })
-                .sum();
+        let pows_sum = input.lines()
+                            .map(|line| {
+                                    let line_cubes_maxes = extract_data_noid(line);
+                                    line_cubes_maxes.pow_max()
+                            })
+                            .sum();
         Ok(pows_sum)
 }
 
@@ -68,36 +68,34 @@ pub fn process(input: &str) -> Result<u64, AocErrorDay02> {
 /// ... I should just have defined the regex as static with lazy
 /// and then iterated over them.
 fn extract_data_noid(hay: &str) -> Cubes {
-        let r_sum = regex_lazyonce!(RED_PAT)
-                .captures_iter(hay)
-                .map(|c| {
-                        let (_, [val]) = c.extract();
-                        val.parse::<u64>().expect("red parse failure")
-                })
-                .max()
-                .unwrap_or(0);
-        let g_sum = regex_lazyonce!(GREEN_PAT)
-                .captures_iter(hay)
-                .map(|c| {
-                        let (_, [val]) = c.extract();
-                        val.parse::<u64>().expect("green parse failure")
-                })
-                .max()
-                .unwrap_or(0);
-        let b_sum = regex_lazyonce!(BLUE_PAT)
-                .captures_iter(hay)
-                .map(|c| {
-                        let (_, [val]) = c.extract();
-                        val.parse::<u64>().expect("blue parse failure")
-                })
-                .max()
-                .unwrap_or(0);
+        let r_sum = regex_lazyonce!(RED_PAT).captures_iter(hay)
+                                            .map(|c| {
+                                                    let (_, [val]) = c.extract();
+                                                    val.parse::<u64>()
+                                                       .expect("red parse failure")
+                                            })
+                                            .max()
+                                            .unwrap_or(0);
+        let g_sum = regex_lazyonce!(GREEN_PAT).captures_iter(hay)
+                                              .map(|c| {
+                                                      let (_, [val]) = c.extract();
+                                                      val.parse::<u64>()
+                                                         .expect("green parse failure")
+                                              })
+                                              .max()
+                                              .unwrap_or(0);
+        let b_sum = regex_lazyonce!(BLUE_PAT).captures_iter(hay)
+                                             .map(|c| {
+                                                     let (_, [val]) = c.extract();
+                                                     val.parse::<u64>()
+                                                        .expect("blue parse failure")
+                                             })
+                                             .max()
+                                             .unwrap_or(0);
 
-        Cubes {
-                red: r_sum,
+        Cubes { red:   r_sum,
                 green: g_sum,
-                blue: b_sum,
-        }
+                blue:  b_sum, }
 }
 #[cfg(test)]
 mod tests {

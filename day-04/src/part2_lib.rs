@@ -1,13 +1,15 @@
 //! Library code for Part 1 of Day 04 of Advent of Code 2023.
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
 
-use crate::custom_error::AocErrorDay04;
+use std::iter::FromIterator;
+
 use derive_more::{Constructor, IntoIterator};
 use miette::Result;
 use once_cell::sync::Lazy;
 use regex::Regex;
-use std::iter::FromIterator;
 use tracing::info;
+
+use crate::custom_error::AocErrorDay04;
 
 // // NOTE: these regex are overlapping
 // // If one decides to pick of elements of athe line for PERF
@@ -39,18 +41,21 @@ pub fn process(input: &str) -> Result<u64, AocErrorDay04> {
         // info!("pile: {:?}", pile);
         println!("fsdfsdfasdfadsfdsaf------------------");
 
-        Ok(pile.cards().into_iter().map(|c| c.copies()).sum())
+        Ok(pile.cards()
+               .into_iter()
+               .map(|c| c.copies())
+               .sum())
 }
 
 /// Represents a single scratch card.
 
 #[derive(Constructor, Debug, PartialEq, Eq)]
 struct ScratchCard {
-        id: u64,
-        copies: u64,
+        id:        u64,
+        copies:    u64,
         // wins_arr: [u64; 5],
         // haves_arr: [u64; 8],
-        wins_arr: [u64; 10],
+        wins_arr:  [u64; 10],
         haves_arr: [u64; 25],
 }
 
@@ -66,9 +71,9 @@ impl ScratchCard {
         /// duplicates
         fn wining_haves_overlap(&self) -> u64 {
                 self.haves_arr
-                        .iter()
-                        .filter(|&n| self.wins_arr.contains(n))
-                        .count() as u64
+                    .iter()
+                    .filter(|&n| self.wins_arr.contains(n))
+                    .count() as u64
         }
 
         /// NOTE: the multiple refernces to splits is error prone
@@ -78,10 +83,13 @@ impl ScratchCard {
                 // static RE_RIGHT: Lazy<Regex> = Lazy::new(|| Regex::new(RIGHT_NUMS).unwrap());
                 static RE_NUM: Lazy<Regex> = Lazy::new(|| Regex::new(NUM).unwrap());
 
-                let ordered_nums: Vec<u64> = RE_NUM
-                        .find_iter(line)
-                        .map(|m| m.as_str().parse::<u64>().expect("parse failure"))
-                        .collect();
+                let ordered_nums: Vec<u64> = RE_NUM.find_iter(line)
+                                                   .map(|m| {
+                                                           m.as_str()
+                                                            .parse::<u64>()
+                                                            .expect("parse failure")
+                                                   })
+                                                   .collect();
 
                 match ordered_nums.len() {
                         // 14 => Some(ScratchCard::new(
@@ -146,8 +154,9 @@ impl<'a> FromIterator<&'a str> for CardPile {
 
 #[cfg(test)]
 mod tests {
-        use super::*;
         use indoc::indoc;
+
+        use super::*;
 
         // WARNING: the structure of the data is different from the main input
         // the code is currently designed for the main input for perf reasons

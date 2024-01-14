@@ -23,12 +23,10 @@ fn check_regex_match_behavior(hay: &str) -> (usize, usize) {
         let pat = r"\d+";
         let re = Regex::new(pat).unwrap();
         let m = re.find(hay).unwrap();
-        info!(
-                "input[{}..{}]: {}",
-                m.start(),
-                m.end(),
-                &hay[m.start()..m.end()]
-        );
+        info!("input[{}..{}]: {}",
+              m.start(),
+              m.end(),
+              &hay[m.start()..m.end()]);
         info!("input.as_str(): {}", m.as_str());
         info!("input.len(): {}", m.len());
         (m.start(), m.end())

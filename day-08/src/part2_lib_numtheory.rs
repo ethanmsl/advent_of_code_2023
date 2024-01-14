@@ -2,16 +2,18 @@
 //! `bin > part2.rs` will run this code along with conent of `input2.txt`
 #![allow(warnings)]
 
-use crate::parser2::path_input::Direction as D;
-use crate::{custom_error::AocErrorDay08, parser2::process_input}; // Note: we use the same parser
-                                                                  // here.
+use std::collections::HashSet;
+
+// here.
 use anyhow::{Context, Result};
 use derive_more::{Constructor, Display, Index, IntoIterator};
 use itertools::Itertools;
 use nalgebra::{DMatrix, DVector};
 use rayon::prelude::*;
-use std::collections::HashSet;
 use tracing::{event, Level};
+
+use crate::parser2::path_input::Direction as D;
+use crate::{custom_error::AocErrorDay08, parser2::process_input}; // Note: we use the same parser
 
 /// Key information about the derived transition matrices
 /// Each matrix represents a progressively longer transition acording to problem directions
@@ -35,7 +37,7 @@ use tracing::{event, Level};
 struct TransitionMatrices {
         #[index]
         #[into_iterator(ref)]
-        mats: Vec<DMatrix<u8>>,
+        mats:      Vec<DMatrix<u8>>,
         solutions: Vec<HashSet<usize>>,
 }
 impl TransitionMatrices {
@@ -43,20 +45,23 @@ impl TransitionMatrices {
         /// 'rotation' through the direction series.
         fn full_trans_mat(&self) -> &DMatrix<u8> {
                 self.mats
-                        .last()
-                        .expect("transition matrices to have been calculated")
+                    .last()
+                    .expect("transition matrices to have been calculated")
         }
+
         /// Convenience method to get number of matrices in the transition series.
         /// (== number of directions in input)
         fn num_mats(&self) -> usize {
                 self.mats.len()
         }
+
         /// Convenience method to get the side length of a matrix.
         /// (All matrices being the same size here.)
         /// Note: side length of a matrix == number of nodes in the input graph.
         fn square_side_len(&self) -> usize {
                 self.mats[0].nrows()
         }
+
         /// Create TransitionsMatrices Structure
         /// Uses matrix and known solution idxs to populate itself.
         /// (Consumes Matrix)
@@ -76,22 +81,20 @@ impl TransitionMatrices {
 /// - l_graph: DMatrix<u8>,
 /// - r_graph: DMatrix<u8>,
 #[derive(Constructor, Display, IntoIterator, Debug, Index)]
-#[display(
-        fmt = "start idxs: {:?}, solution_idxs: {:?},\ndirections {:?},\nl_graph: {},\nr_graph: {}]",
-        start_idxs,
-        solution_idxs,
-        directions,
-        l_graph,
-        r_graph
-)]
+#[display(fmt = "start idxs: {:?}, solution_idxs: {:?},\ndirections {:?},\nl_graph: {},\nr_graph: {}]",
+          start_idxs,
+          solution_idxs,
+          directions,
+          l_graph,
+          r_graph)]
 struct ProblemSpecifics {
         #[index]
         #[into_iterator(ref)]
-        directions: Vec<D>,
-        start_idxs: Vec<usize>,
+        directions:    Vec<D>,
+        start_idxs:    Vec<usize>,
         solution_idxs: Vec<usize>,
-        l_graph: DMatrix<u8>,
-        r_graph: DMatrix<u8>,
+        l_graph:       DMatrix<u8>,
+        r_graph:       DMatrix<u8>,
 }
 impl ProblemSpecifics {
         /// Convenience method to get the length of the directions vector.
@@ -133,31 +136,32 @@ impl ProblemSpecifics {
 /// - (D) we calculate the lcm of all cycle lengths, accout for offset + other offset, then (bleh!)
 /// finsh the solution to determine when solutions all align.
 #[derive(Debug, Constructor, Display)]
-#[display(
-        fmt = "start_id: {} full_cycle_node_offset_path: {:?} full_cycle_node_cycle_path: {:?}",
-        start_id,
-        full_cycle_node_offset_path,
-        full_cycle_node_cycle_path
-)]
+#[display(fmt = "start_id: {} full_cycle_node_offset_path: {:?} full_cycle_node_cycle_path: {:?}",
+          start_id,
+          full_cycle_node_offset_path,
+          full_cycle_node_cycle_path)]
 struct IndependentPath {
-        start_id: usize, // will match an element of ProblemSpecifics.start_idxs
+        start_id:                    usize, // will match an element of ProblemSpecifics.start_idxs
         full_cycle_node_offset_path: Option<Vec<usize>>,
-        full_cycle_node_cycle_path: Option<Vec<usize>>,
-        solution_absolute_offsets: Option<Vec<usize>>,
+        full_cycle_node_cycle_path:  Option<Vec<usize>>,
+        solution_absolute_offsets:   Option<Vec<usize>>,
 }
 impl IndependentPath {
         /// Convenience method to get id
         fn id(&self) -> usize {
                 self.start_id
         }
+
         /// Setter for full_cycle_node_offset_path
         fn set_full_cycle_node_offset_path(&mut self, path: Vec<usize>) {
                 self.full_cycle_node_offset_path = Some(path);
         }
+
         /// Setter for full_cycle_node_cycle_path
         fn set_full_cycle_node_cycle_path(&mut self, path: Vec<usize>) {
                 self.full_cycle_node_cycle_path = Some(path);
         }
+
         /// Setter for solution_absolute_offsets
         fn set_solution_absolute_offsets(&mut self, path: Vec<usize>) {
                 self.solution_absolute_offsets = Some(path);
@@ -229,25 +233,27 @@ pub fn process(input: &str) -> Result<usize> {
         };
         let mut paths: Vec<IndependentPath> = {
                 prob.start_idxs
-                        .iter()
-                        .map(|id| IndependentPath::new(*id, None, None, None))
-                        .collect()
+                    .iter()
+                    .map(|id| IndependentPath::new(*id, None, None, None))
+                    .collect()
         };
         // all inpts idx that create solutions for each 0-to-n transition matrix
 
         #[cfg(debug_assertions)]
         {
-                for (id, mat) in transitions.mats.iter().enumerate() {
+                for (id, mat) in transitions.mats
+                                            .iter()
+                                            .enumerate()
+                {
                         event!(Level::TRACE, "directions: {:?}", prob.directions);
                         event!(Level::INFO, "start idxs: {:?}", prob.start_idxs);
                         event!(Level::INFO, "solution_idxs: {:?}", prob.solution_idxs);
-                        event!(
-                                Level::TRACE,
-                                "\nmat[{}]: dirs[0..=id]: {:?} \n {}",
-                                id,
-                                prob.directions[0..=id].iter().collect::<Vec<_>>(),
-                                mat,
-                        );
+                        event!(Level::TRACE,
+                               "\nmat[{}]: dirs[0..=id]: {:?} \n {}",
+                               id,
+                               prob.directions[0..=id].iter()
+                                                      .collect::<Vec<_>>(),
+                               mat,);
                 }
         }
 
@@ -349,29 +355,27 @@ pub fn process(input: &str) -> Result<usize> {
 
 /// Given a list of matrices and inputs, and solutions, give the offsets corresponding to
 /// solutions.
-fn calculate_offsets(
-        start_idxs: &Vec<usize>,
-        solution_idxs: &Vec<usize>,
-        matrices: &Vec<DMatrix<u8>>,
-) -> Vec<(usize, usize)> {
+fn calculate_offsets(start_idxs: &Vec<usize>,
+                     solution_idxs: &Vec<usize>,
+                     matrices: &Vec<DMatrix<u8>>)
+                     -> Vec<(usize, usize)> {
         let num_mats = matrices.len();
         matrices.iter()
                 .enumerate()
                 .flat_map(|(mat_num, mat)| {
-                        start_idxs
-                                .iter()
-                                .map(|idx| get_out_node(idx, &mat.clone()))
-                                .filter(|&idx| solution_idxs.contains(&idx))
-                                .map(move |sol_idx| (sol_idx, mat_num))
+                        start_idxs.iter()
+                                  .map(|idx| get_out_node(idx, &mat.clone()))
+                                  .filter(|&idx| solution_idxs.contains(&idx))
+                                  .map(move |sol_idx| (sol_idx, mat_num))
                 })
                 .collect()
 }
 
 fn get_out_node(idx: &usize, mat: &DMatrix<u8>) -> usize {
         mat.column(*idx)
-                .iter()
-                .position(|&x| x == 1)
-                .expect("all nodes should have an output")
+           .iter()
+           .position(|&x| x == 1)
+           .expect("all nodes should have an output")
 }
 /// For any finite, binary output matrix - transitions cylces must eventually occur
 /// For matrices with a *single* output node they will occur within the number of nodes present
@@ -391,16 +395,19 @@ fn trans_to_cycle(idx: &usize, trans_matrix: &DMatrix<u8>) -> (Vec<usize>, Vec<u
 
         // We are searching based on assumptions above, rather than  more expensive dense matrix calcs
         loop {
-                output_node = trans_matrix
-                        .column(*nodes_visited_unq.last().expect("populated vector"))
-                        .iter()
-                        .position(|&x| x == 1)
-                        .expect("all nodes should have an output");
-                if let Some(cycle_pos) = nodes_visited_unq.iter().position(|&x| x == output_node) {
+                output_node = trans_matrix.column(*nodes_visited_unq.last()
+                                                                    .expect("populated vector"))
+                                          .iter()
+                                          .position(|&x| x == 1)
+                                          .expect("all nodes should have an output");
+                if let Some(cycle_pos) = nodes_visited_unq.iter()
+                                                          .position(|&x| x == output_node)
+                {
                         let offset_path = nodes_visited_unq[0..cycle_pos].to_vec();
                         let cycling_path = nodes_visited_unq[cycle_pos..].to_vec();
                         return (offset_path, cycling_path);
-                } else if nodes_visited_unq.len() > theoretical_limit {
+                }
+                else if nodes_visited_unq.len() > theoretical_limit {
                         panic!("Logic error - more nodes visited than nodes available!, nodes_visited_unq: {}, theoretical_limit: {}", nodes_visited_unq.len(), theoretical_limit)
                 }
                 nodes_visited_unq.push(output_node)
@@ -411,9 +418,16 @@ fn trans_to_cycle(idx: &usize, trans_matrix: &DMatrix<u8>) -> (Vec<usize>, Vec<u
 /// Finds the indices of all elements in a vector that are equal to 1.
 fn find_ones_indices(vector: &DVector<u8>) -> HashSet<usize> {
         vector.iter()
-                .enumerate()
-                .filter_map(|(idx, &val)| if val == 1 { Some(idx) } else { None })
-                .collect()
+              .enumerate()
+              .filter_map(|(idx, &val)| {
+                      if val == 1 {
+                              Some(idx)
+                      }
+                      else {
+                              None
+                      }
+              })
+              .collect()
 }
 
 /// Converts a list of indices into a vector of 0s and 1s.
@@ -464,54 +478,57 @@ fn convert_indices_to_vector(idxs: &[usize], max_size: usize) -> DVector<u8> {
 /// ];
 /// assert_eq!(solving_inputs, expected);
 /// ```
-pub fn calculate_solving_inputs(
-        matrices: &[DMatrix<u8>],
-        solution_idxs: &Vec<usize>,
-) -> Vec<HashSet<usize>> {
+pub fn calculate_solving_inputs(matrices: &[DMatrix<u8>],
+                                solution_idxs: &Vec<usize>)
+                                -> Vec<HashSet<usize>> {
         let solution_vector = convert_indices_to_vector(&solution_idxs, matrices[0].ncols());
-        let result: Vec<HashSet<usize>> = matrices
-                .iter()
-                .map(|mat| {
-                        let transposed_mat = mat.transpose();
-                        let result = &transposed_mat * &solution_vector;
+        let result: Vec<HashSet<usize>> = matrices.iter()
+                                                  .map(|mat| {
+                                                          let transposed_mat = mat.transpose();
+                                                          let result = &transposed_mat
+                                                                       * &solution_vector;
 
-                        // Collect indices of ones
-                        result.iter()
-                                .enumerate()
-                                .filter_map(|(idx, &val)| if val == 1 { Some(idx) } else { None })
-                                .collect::<HashSet<usize>>()
-                })
-                .collect();
+                                                          // Collect indices of ones
+                                                          result.iter()
+                                                                .enumerate()
+                                                                .filter_map(|(idx, &val)| {
+                                                                        if val == 1 {
+                                                                                Some(idx)
+                                                                        }
+                                                                        else {
+                                                                                None
+                                                                        }
+                                                                })
+                                                                .collect::<HashSet<usize>>()
+                                                  })
+                                                  .collect();
         result
 }
 
-fn dirs_to_paths(
-        directions_vec: &[D],
-        path_choices: (&DMatrix<u8>, &DMatrix<u8>),
-) -> Vec<DMatrix<u8>> {
+fn dirs_to_paths(directions_vec: &[D],
+                 path_choices: (&DMatrix<u8>, &DMatrix<u8>))
+                 -> Vec<DMatrix<u8>> {
         let (l_mat, r_mat) = path_choices;
 
-        directions_vec
-                .iter()
-                .map(|dir| match dir {
-                        D::Left => l_mat,
-                        D::Right => r_mat,
-                })
-                .scan(
-                        nalgebra::DMatrix::identity(l_mat.nrows(), l_mat.ncols()),
-                        |acc, mat| {
-                                let new_mat = mat * &*acc;
-                                *acc = new_mat.clone();
-                                Some(new_mat)
-                        },
-                )
-                .collect::<Vec<_>>()
+        directions_vec.iter()
+                      .map(|dir| match dir {
+                              D::Left => l_mat,
+                              D::Right => r_mat,
+                      })
+                      .scan(nalgebra::DMatrix::identity(l_mat.nrows(), l_mat.ncols()),
+                            |acc, mat| {
+                                    let new_mat = mat * &*acc;
+                                    *acc = new_mat.clone();
+                                    Some(new_mat)
+                            })
+                      .collect::<Vec<_>>()
 }
 
 #[cfg(test)]
 mod tests {
-        use super::*;
         use indoc::indoc;
+
+        use super::*;
 
         #[test]
         fn test_process_example_1() -> Result<()> {

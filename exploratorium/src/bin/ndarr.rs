@@ -1,11 +1,9 @@
 //! NDArray
-#![allow(
-        clippy::many_single_char_names,
-        clippy::deref_addrof,
-        clippy::unreadable_literal,
-        clippy::many_single_char_names,
-        clippy::reversed_empty_ranges
-)]
+#![allow(clippy::many_single_char_names,
+         clippy::deref_addrof,
+         clippy::unreadable_literal,
+         clippy::many_single_char_names,
+         clippy::reversed_empty_ranges)]
 
 use ndarray::prelude::*;
 
@@ -18,14 +16,16 @@ type Board = Array2<u8>;
 fn parse(x: &[u8]) -> Board {
         // make a border of 0 cells
         let mut map = Board::from_elem(((N + 2), (N + 2)), 0);
-        let a = Array::from_iter(x.iter().filter_map(|&b| match b {
-                b'#' => Some(1),
-                b'.' => Some(0),
-                _ => None,
-        }));
+        let a = Array::from_iter(x.iter()
+                                  .filter_map(|&b| match b {
+                                          b'#' => Some(1),
+                                          b'.' => Some(0),
+                                          _ => None,
+                                  }));
 
         let a = a.into_shape((N, N)).unwrap();
-        map.slice_mut(s![1..-1, 1..-1]).assign(&a);
+        map.slice_mut(s![1..-1, 1..-1])
+           .assign(&a);
         map
 }
 
@@ -72,7 +72,8 @@ fn render(a: &Board) {
                 for &x in row {
                         if x > 0 {
                                 print!("#");
-                        } else {
+                        }
+                        else {
                                 print!(".");
                         }
                 }
@@ -91,6 +92,8 @@ fn main() {
                 //render(&a);
         }
         render(&a);
-        let alive = a.iter().filter(|&&x| x > 0).count();
+        let alive = a.iter()
+                     .filter(|&&x| x > 0)
+                     .count();
         println!("After {} steps there are {} cells alive", steps, alive);
 }

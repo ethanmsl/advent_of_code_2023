@@ -1,13 +1,15 @@
 //! Library code for Part 1 of Day 05 of Advent of Code 2023.
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
 
-use crate::custom_error::AocErrorDay05;
+use std::ops::Range;
+
 use derive_more::Constructor;
 use miette::Result;
 use once_cell::sync::Lazy;
 use regex::Regex;
-use std::ops::Range;
 use tracing::{debug, info, trace};
+
+use crate::custom_error::AocErrorDay05;
 
 // Capture Patterns for Regex generation
 static RE_SEEDS: Lazy<Regex> = Lazy::new(|| Regex::new(r"seeds: (?<seednumbers>.*)$").unwrap());
@@ -64,14 +66,16 @@ pub fn process(input: &str) -> Result<i64, AocErrorDay05> {
         info!("Hiii. from  day-05 Part1! :)");
         // splitting input along blank lines (blank lines discarded)
         let mut it_chunk = input.split("\n\n");
-        let first_line = it_chunk.next().expect("empty input");
+        let first_line = it_chunk.next()
+                                 .expect("empty input");
 
         let seeds: Vec<DynThings> = read_seeds(first_line).ok_or(AocErrorDay05::SeedsParse(
                 "Failed to parse seeds".to_string(),
         ))?;
         debug!("seeds: {:?}", seeds);
 
-        let maps: Vec<Map> = it_chunk.map(Map::from_str).collect();
+        let maps: Vec<Map> = it_chunk.map(Map::from_str)
+                                     .collect();
 
         seeds.iter()
                 .map(|seed| {
@@ -90,23 +94,27 @@ pub fn process(input: &str) -> Result<i64, AocErrorDay05> {
 /// Read a single line string and extract seed values.
 fn read_seeds(line: &str) -> Option<Vec<DynThings>> {
         const SEED: &str = "seed";
-        let Some(_) = RE_SEEDS.captures(line) else {
+        let Some(_) = RE_SEEDS.captures(line)
+        else {
                 return None;
         };
 
-        Some(RE_NUM
-                .find_iter(line)
-                .map(|m| m.as_str().parse::<i64>().expect("parse failure"))
-                .map(|val| DynThings::new(SEED.to_string(), val))
-                .collect())
+        Some(RE_NUM.find_iter(line)
+                   .map(|m| {
+                           m.as_str()
+                            .parse::<i64>()
+                            .expect("parse failure")
+                   })
+                   .map(|val| DynThings::new(SEED.to_string(), val))
+                   .collect())
 }
 
 /// input & output values and 'range-bumps' that may modify an object
 /// PERF: replace Strings with &str referencing static strings.
 #[derive(Debug, PartialEq, Eq, Constructor)]
 struct Map {
-        inp: String,
-        out: String,
+        inp:   String,
+        out:   String,
         rmaps: Vec<RangeBump>,
 }
 
@@ -115,56 +123,52 @@ impl Map {
         /// With**out** validating input kind or relaying output kind.
         fn val_only_passthrough(&self, val: i64) -> i64 {
                 self.rmaps
-                        .iter()
-                        .filter_map(|rmap| rmap.try_bump(val))
-                        .next()
-                        .unwrap_or(val)
+                    .iter()
+                    .filter_map(|rmap| rmap.try_bump(val))
+                    .next()
+                    .unwrap_or(val)
         }
 
         // Populate a map from a contiguous chunk of map string data.
         fn from_str(chunk: &str) -> Self {
                 let mut lines = chunk.lines();
                 let mut rmaps: Vec<RangeBump> = Vec::new();
-                let first_line = lines.next().expect("empty chunk");
+                let first_line = lines.next()
+                                      .expect("empty chunk");
                 trace!("first_line: {:?}", first_line);
 
-                let caps = RE_A_TO_B.captures(first_line).expect("invalid map header");
-                let inp = caps
-                        .name("input")
-                        .expect("invalid 'input' map header")
-                        .as_str()
-                        .to_string();
-                let out = caps
-                        .name("output")
-                        .expect("invalid 'output' map header")
-                        .as_str()
-                        .to_string();
+                let caps = RE_A_TO_B.captures(first_line)
+                                    .expect("invalid map header");
+                let inp = caps.name("input")
+                              .expect("invalid 'input' map header")
+                              .as_str()
+                              .to_string();
+                let out = caps.name("output")
+                              .expect("invalid 'output' map header")
+                              .as_str()
+                              .to_string();
                 lines.for_each(|line| {
-                        let caps = RE_VAL_MAP.captures(line).expect("invalid map line");
-                        let in_start = caps
-                                .name("instart")
-                                .expect("in_start")
-                                .as_str()
-                                .parse::<i64>()
-                                .expect("instart parse failure");
-                        let out_start = caps
-                                .name("outstart")
-                                .expect("outstart")
-                                .as_str()
-                                .parse::<i64>()
-                                .expect("outstart parse failure");
-                        let length = caps
-                                .name("length")
-                                .expect("length")
-                                .as_str()
-                                .parse::<i64>()
-                                .expect("length parse failure");
+                             let caps = RE_VAL_MAP.captures(line)
+                                                  .expect("invalid map line");
+                             let in_start = caps.name("instart")
+                                                .expect("in_start")
+                                                .as_str()
+                                                .parse::<i64>()
+                                                .expect("instart parse failure");
+                             let out_start = caps.name("outstart")
+                                                 .expect("outstart")
+                                                 .as_str()
+                                                 .parse::<i64>()
+                                                 .expect("outstart parse failure");
+                             let length = caps.name("length")
+                                              .expect("length")
+                                              .as_str()
+                                              .parse::<i64>()
+                                              .expect("length parse failure");
 
-                        rmaps.push(RangeBump::new(
-                                out_start - in_start,
-                                in_start..(in_start + length),
-                        ));
-                });
+                             rmaps.push(RangeBump::new(out_start - in_start,
+                                                       in_start..(in_start + length)));
+                     });
 
                 Self::new(inp, out, rmaps)
         }
@@ -185,7 +189,7 @@ impl Map {
 #[derive(Debug, PartialEq, Eq, Constructor)]
 struct RangeBump {
         offset: i64,
-        range: Range<i64>,
+        range:  Range<i64>,
 }
 
 impl RangeBump {
@@ -195,7 +199,8 @@ impl RangeBump {
                 debug!(?val, ?self);
                 if self.range.contains(&val) {
                         Some(val + self.offset)
-                } else {
+                }
+                else {
                         None
                 }
         }
@@ -210,13 +215,14 @@ impl RangeBump {
 #[derive(Debug, PartialEq, Eq, Constructor)]
 struct DynThings {
         kind: String,
-        val: i64,
+        val:  i64,
 }
 
 #[cfg(test)]
 mod tests {
-        use super::*;
         use indoc::indoc;
+
+        use super::*;
 
         #[test]
         fn test_process_example() -> Result<()> {

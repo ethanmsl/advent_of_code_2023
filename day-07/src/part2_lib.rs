@@ -2,16 +2,18 @@
 //! `bin > part2.rs` will run this code along with conent of `input2.txt`
 
 // use crate::custom_error::AocErrorDay07;
-use crate::lexer_2::{Card, Token};
+// use regex::Regex;
+use std::collections::HashMap;
+
 use anyhow::Result;
 use derive_more::Constructor;
 use itertools::Itertools;
 use logos::Logos;
 // use once_cell::sync::Lazy;
 use rayon::prelude::*;
-// use regex::Regex;
-use std::collections::HashMap;
 use tracing::{event, Level};
+
+use crate::lexer_2::{Card, Token};
 // use miette::Result;
 
 /// Hand Types
@@ -39,25 +41,22 @@ impl HType {
                 }
 
                 // remove 'J's
-                let j_count = fmap.remove_entry(&Card::CJ).map(|(_, v)| v);
+                let j_count = fmap.remove_entry(&Card::CJ)
+                                  .map(|(_, v)| v);
                 let mut counts: Vec<u8> = fmap.into_values().collect();
                 counts.sort();
                 if let Some(j_count) = j_count {
-                        event!(
-                                Level::INFO,
-                                "(called from parallelized routine) enter {:?}",
-                                counts
-                        );
+                        event!(Level::INFO,
+                               "(called from parallelized routine) enter {:?}",
+                               counts);
                         let mb_highest = counts.last_mut();
                         match mb_highest {
                                 Some(highest) => *highest += j_count,
                                 None => counts.push(j_count), // in case there were only Js
                         }
-                        event!(
-                                Level::WARN,
-                                "(called from parallelized routine) exit {:?}",
-                                counts
-                        );
+                        event!(Level::WARN,
+                               "(called from parallelized routine) exit {:?}",
+                               counts);
                 }
                 match counts.as_slice() {
                         [_, _, _, _, _] => Some(HType::H____1),
@@ -81,7 +80,7 @@ impl HType {
 struct Hand {
         htype: Option<HType>,
         cards: [Card; 5],
-        bid: u64,
+        bid:   u64,
 }
 impl Hand {
         /// Sets hand's htype if not already set.
@@ -96,23 +95,26 @@ impl Hand {
 #[tracing::instrument(skip(input))]
 pub fn process(input: &str) -> Result<u64> {
         event!(Level::INFO, "Hiii. from  day-07 Part1! :)");
-        let mut hands: Vec<Hand> = Token::lexer(input)
-                .spanned()
-                .filter_map(|(t, _)| t.ok())
-                .chunks(2)
-                .into_iter()
-                .map(|mut chunk| {
-                        let hand = chunk.next().unwrap();
-                        let bid = chunk.next().unwrap();
-                        Hand::new(None, hand.unwrap_proto_hand(), bid.unwrap_bid())
-                })
-                .inspect(|h| event!(Level::TRACE, "Hand: {:?}", h))
-                .collect();
+        let mut hands: Vec<Hand> =
+                Token::lexer(input).spanned()
+                                   .filter_map(|(t, _)| t.ok())
+                                   .chunks(2)
+                                   .into_iter()
+                                   .map(|mut chunk| {
+                                           let hand = chunk.next().unwrap();
+                                           let bid = chunk.next().unwrap();
+                                           Hand::new(None,
+                                                     hand.unwrap_proto_hand(),
+                                                     bid.unwrap_bid())
+                                   })
+                                   .inspect(|h| event!(Level::TRACE, "Hand: {:?}", h))
+                                   .collect();
 
-        hands.par_iter_mut().for_each(|h| {
-                (*h).determine_htype();
-                event!(Level::TRACE, "Hand: {:?}", h);
-        });
+        hands.par_iter_mut()
+             .for_each(|h| {
+                     (*h).determine_htype();
+                     event!(Level::TRACE, "Hand: {:?}", h);
+             });
         event!(Level::TRACE, "Hands: {:?}", hands);
         // using stable sort just in case...
         hands.sort();
@@ -126,8 +128,9 @@ pub fn process(input: &str) -> Result<u64> {
 
 #[cfg(test)]
 mod tests {
-        use super::*;
         use indoc::indoc;
+
+        use super::*;
 
         #[test]
         fn test_process_example() -> Result<()> {

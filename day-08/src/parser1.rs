@@ -30,24 +30,23 @@
 //! improve performance that way.
 // #![allow(warnings)]
 
+use std::collections::{HashMap, HashSet};
+
 use derive_more::Constructor;
 use nalgebra::DMatrix;
 use once_cell::sync::Lazy;
 use path_input::*;
 use regex::bytes;
-use std::collections::{HashMap, HashSet};
 use tracing::{event, Level};
 
 pub fn process_input(input: &str) -> (Vec<Direction>, DMatrix<u8>, DMatrix<u8>) {
         let mut input_lines = input.lines();
-        let first_line = input_lines
-                .next()
-                .expect("Input should have at least one line");
+        let first_line = input_lines.next()
+                                    .expect("Input should have at least one line");
         let directions = path_input::line_to_directions(first_line.as_bytes());
-        let component_lines = input_lines
-                .skip(1)
-                .map(|line| line.as_bytes())
-                .collect::<Vec<_>>();
+        let component_lines = input_lines.skip(1)
+                                         .map(|line| line.as_bytes())
+                                         .collect::<Vec<_>>();
         let (l_mat, r_mat) = graph_components::process_components(component_lines);
         (directions, l_mat, r_mat)
 }
@@ -68,8 +67,8 @@ pub mod graph_components {
         /// Raw Graph Component Data read from a Byte-String
         #[derive(Constructor, Debug, Clone, Copy, PartialEq, Eq)]
         struct RawGraphComponent {
-                input: [u8; 3],
-                left_output: [u8; 3],
+                input:        [u8; 3],
+                left_output:  [u8; 3],
                 right_output: [u8; 3],
         }
 
@@ -79,16 +78,16 @@ pub mod graph_components {
                 static RE_GRAPH_COMP: Lazy<bytes::Regex> =
                         Lazy::new(|| bytes::Regex::new(GRAPH_COMPONENT).unwrap());
 
-                let (_, [inp, l_out, r_out]) = RE_GRAPH_COMP
-                        .captures(hay)
-                        .map(|caps| caps.extract())
-                        .expect("Regex Extraction Failure.");
+                let (_, [inp, l_out, r_out]) = RE_GRAPH_COMP.captures(hay)
+                                                            .map(|caps| caps.extract())
+                                                            .expect("Regex Extraction Failure.");
 
-                RawGraphComponent {
-                        input: inp.try_into().expect("invalid input node"),
-                        left_output: l_out.try_into().expect("invalid input node"),
-                        right_output: r_out.try_into().expect("invalid input node"),
-                }
+                RawGraphComponent { input:        inp.try_into()
+                                                     .expect("invalid input node"),
+                                    left_output:  l_out.try_into()
+                                                       .expect("invalid input node"),
+                                    right_output: r_out.try_into()
+                                                       .expect("invalid input node"), }
         }
 
         // TODO:
@@ -101,10 +100,9 @@ pub mod graph_components {
 
         /// Rather messy construction of a couple Graph Matrices.
         pub fn process_components(input_lines: Vec<&[u8]>) -> (DMatrix<u8>, DMatrix<u8>) {
-                let components: Vec<RawGraphComponent> = input_lines
-                        .into_iter()
-                        .map(parse_raw_graph_component)
-                        .collect();
+                let components: Vec<RawGraphComponent> = input_lines.into_iter()
+                                                                    .map(parse_raw_graph_component)
+                                                                    .collect();
 
                 // Collect input and output nodes separately
                 let mut input_nodes = HashSet::new();
@@ -116,39 +114,37 @@ pub mod graph_components {
                 }
 
                 // Combine and sort nodes for matrix indices
-                let mut nodes: Vec<_> = input_nodes.union(&output_nodes).cloned().collect();
+                let mut nodes: Vec<_> = input_nodes.union(&output_nodes)
+                                                   .cloned()
+                                                   .collect();
                 nodes.sort_unstable(); // Sort nodes; adjust sorting criteria as needed
 
-                event!(
-                        Level::DEBUG,
-                        "Components: {}, Input: {}, Output: {}",
-                        components.len(),
-                        input_nodes.len(),
-                        output_nodes.len()
-                );
+                event!(Level::DEBUG,
+                       "Components: {}, Input: {}, Output: {}",
+                       components.len(),
+                       input_nodes.len(),
+                       output_nodes.len());
 
                 // Check extent to which input and output nodes differ
                 // (Neither needs to be included wholly in the other.  But I'm curious.)
                 #[cfg(debug_assertions)]
                 {
                         let diff_input_not_output: HashSet<_> =
-                                input_nodes.difference(&output_nodes).collect();
+                                input_nodes.difference(&output_nodes)
+                                           .collect();
                         let diff_output_not_input: HashSet<_> =
-                                output_nodes.difference(&input_nodes).collect();
-                        event!(
-                                Level::DEBUG,
-                                "Diff: Input - Output: {}, Output - Input: {}",
-                                diff_input_not_output.len(),
-                                diff_output_not_input.len()
-                        );
+                                output_nodes.difference(&input_nodes)
+                                            .collect();
+                        event!(Level::DEBUG,
+                               "Diff: Input - Output: {}, Output - Input: {}",
+                               diff_input_not_output.len(),
+                               diff_output_not_input.len());
 
-                        event!(
-                                Level::DEBUG,
-                                "first is: {:?}, last is: {:?}, comp.len(): {}",
-                                std::str::from_utf8(nodes.first().unwrap()).unwrap(),
-                                std::str::from_utf8(nodes.last().unwrap()).unwrap(),
-                                components.len(),
-                        );
+                        event!(Level::DEBUG,
+                               "first is: {:?}, last is: {:?}, comp.len(): {}",
+                               std::str::from_utf8(nodes.first().unwrap()).unwrap(),
+                               std::str::from_utf8(nodes.last().unwrap()).unwrap(),
+                               components.len(),);
 
                         // Verify positions of "AAA" and "ZZZ"
                         if nodes.first() != Some(&[b'A', b'A', b'A']) {
@@ -160,11 +156,10 @@ pub mod graph_components {
                 }
 
                 // Map nodes to indices
-                let node_indices: HashMap<_, _> = nodes
-                        .into_iter()
-                        .enumerate()
-                        .map(|(i, node)| (node, i))
-                        .collect();
+                let node_indices: HashMap<_, _> = nodes.into_iter()
+                                                       .enumerate()
+                                                       .map(|(i, node)| (node, i))
+                                                       .collect();
 
                 // Initialize and populate matrices...
                 let size = node_indices.len();
@@ -178,7 +173,8 @@ pub mod graph_components {
                         if comp.input == [b'Z', b'Z', b'Z'] {
                                 left_matrix[(input_idx, input_idx)] = 1;
                                 right_matrix[(input_idx, input_idx)] = 1;
-                        } else {
+                        }
+                        else {
                                 let left_idx = node_indices[&comp.left_output];
                                 let right_idx = node_indices[&comp.right_output];
                                 left_matrix[(left_idx, input_idx)] = 1;
@@ -247,10 +243,11 @@ pub mod path_input {
         pub fn line_to_directions(hay: &[u8]) -> Vec<Direction> {
                 static RE_INPUT: Lazy<bytes::Regex> =
                         Lazy::new(|| bytes::Regex::new(INPUT).unwrap());
-                let (_, [path]) = RE_INPUT
-                        .captures(hay)
-                        .map(|caps| caps.extract())
-                        .expect("Regex Extraction Failure.");
-                path.iter().map(Direction::byte_to_dir).collect()
+                let (_, [path]) = RE_INPUT.captures(hay)
+                                          .map(|caps| caps.extract())
+                                          .expect("Regex Extraction Failure.");
+                path.iter()
+                    .map(Direction::byte_to_dir)
+                    .collect()
         }
 }

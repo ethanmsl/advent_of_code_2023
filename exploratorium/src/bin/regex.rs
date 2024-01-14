@@ -40,55 +40,57 @@ fn main() -> Result<()> {
 /// Read a single line string and extract seed values.
 fn read_seeds(line: &str) -> Option<Vec<(String, u64)>> {
         const SEED: &str = "seed";
-        let Some(_) = RE_SEEDS.captures(line) else {
+        let Some(_) = RE_SEEDS.captures(line)
+        else {
                 return None;
         };
 
-        Some(RE_NUM
-                .find_iter(line)
-                .map(|m| m.as_str().parse::<u64>().expect("parse failure"))
-                .map(|val| (SEED.to_string(), val))
-                .collect())
+        Some(RE_NUM.find_iter(line)
+                   .map(|m| {
+                           m.as_str()
+                            .parse::<u64>()
+                            .expect("parse failure")
+                   })
+                   .map(|val| (SEED.to_string(), val))
+                   .collect())
 }
 
 // Populate a map from a contiguous chunk of map string data.
 fn from_str(chunk: &str) -> () {
         let mut lines = chunk.lines();
-        let first_line = lines.next().expect("empty chunk");
+        let first_line = lines.next()
+                              .expect("empty chunk");
         trace!("first_line: {:?}", first_line);
 
-        let caps = RE_A_TO_B.captures(first_line).expect("invalid map header");
-        let inp = caps
-                .name("input")
-                .expect("invalid 'input' map header")
-                .as_str()
-                .to_string();
-        let out = caps
-                .name("output")
-                .expect("invalid 'output' map header")
-                .as_str()
-                .to_string();
+        let caps = RE_A_TO_B.captures(first_line)
+                            .expect("invalid map header");
+        let inp = caps.name("input")
+                      .expect("invalid 'input' map header")
+                      .as_str()
+                      .to_string();
+        let out = caps.name("output")
+                      .expect("invalid 'output' map header")
+                      .as_str()
+                      .to_string();
 
         lines.for_each(|line| {
-                let caps = RE_VAL_MAP.captures(line).expect("invalid map line");
-                let in_start = caps
-                        .name("instart")
-                        .expect("in_start")
-                        .as_str()
-                        .parse::<i64>()
-                        .expect("instart parse failure");
-                let out_start = caps
-                        .name("outstart")
-                        .expect("outstart")
-                        .as_str()
-                        .parse::<i64>()
-                        .expect("outstart parse failure");
-                let length = caps
-                        .name("length")
-                        .expect("length")
-                        .as_str()
-                        .parse::<i64>()
-                        .expect("length parse failure");
-        });
+                     let caps = RE_VAL_MAP.captures(line)
+                                          .expect("invalid map line");
+                     let in_start = caps.name("instart")
+                                        .expect("in_start")
+                                        .as_str()
+                                        .parse::<i64>()
+                                        .expect("instart parse failure");
+                     let out_start = caps.name("outstart")
+                                         .expect("outstart")
+                                         .as_str()
+                                         .parse::<i64>()
+                                         .expect("outstart parse failure");
+                     let length = caps.name("length")
+                                      .expect("length")
+                                      .as_str()
+                                      .parse::<i64>()
+                                      .expect("length parse failure");
+             });
         ()
 }

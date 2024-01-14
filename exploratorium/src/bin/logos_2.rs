@@ -35,16 +35,14 @@ enum Example {
 
 #[allow(clippy::approx_constant)]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-        let tokens: Vec<_> = Example::lexer("42 3.14 -5 f").spanned().collect();
+        let tokens: Vec<_> = Example::lexer("42 3.14 -5 f").spanned()
+                                                           .collect();
 
-        assert_eq!(
-                tokens,
-                &[
+        assert_eq!(tokens, &[
                         (Ok(Example::Integer(42)), 0..2),
                         (Ok(Example::Float(3.14)), 3..7),
                         (Ok(Example::Integer(-5)), 8..10),
                         (Err(LexingError::Other), 11..12), // 'f' is not a recognized token
-                ],
-        );
+                ],);
         Ok(())
 }

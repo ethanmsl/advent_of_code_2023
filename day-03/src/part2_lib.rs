@@ -1,11 +1,15 @@
 //! Library code for Part 2 of Day 03 of Advent of Code 2023.
 //! `bin > part2.rs` will run this code along with conent of `input2.txt`
 
-use crate::custom_error::AocErrorDay03;
-use crate::data_types_part2::{NumberRegister, StarAndAdjacenciesRegister};
-use miette::Result;
 use std::collections::HashMap;
+
+use miette::Result;
 use tracing::info;
+
+use crate::{
+        custom_error::AocErrorDay03,
+        data_types_part2::{NumberRegister, StarAndAdjacenciesRegister},
+};
 
 /// Basically we need to do the same thing, but now we need
 /// run across a specific special char's adjacencies
@@ -17,10 +21,12 @@ pub fn process(input: &str) -> Result<u64, AocErrorDay03> {
         let mut star_adjacencies = StarAndAdjacenciesRegister::new();
 
         // register numbers & special chars
-        input.lines().enumerate().for_each(|(row, raw_line)| {
-                numbers.register_numbers(row as i64, raw_line);
-                star_adjacencies.register_special_adjacencies(row as i64, raw_line);
-        });
+        input.lines()
+             .enumerate()
+             .for_each(|(row, raw_line)| {
+                     numbers.register_numbers(row as i64, raw_line);
+                     star_adjacencies.register_special_adjacencies(row as i64, raw_line);
+             });
 
         // check what numbers are adjacent to each star
         let mut sum = 0;
@@ -33,7 +39,8 @@ pub fn process(input: &str) -> Result<u64, AocErrorDay03> {
                         };
                 }
                 if adjacent_nums.len() == 2 {
-                        let product = adjacent_nums.values().product::<u64>();
+                        let product = adjacent_nums.values()
+                                                   .product::<u64>();
                         info!(?id, ?product);
                         sum += product;
                 }
@@ -43,8 +50,9 @@ pub fn process(input: &str) -> Result<u64, AocErrorDay03> {
 
 #[cfg(test)]
 mod tests {
-        use super::*;
         use indoc::indoc;
+
+        use super::*;
 
         #[test]
         fn test_process_example() -> Result<()> {

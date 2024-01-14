@@ -2,13 +2,17 @@
 //! `bin > part2.rs` will run this code along with conent of `input2.txt`
 #![allow(warnings)]
 
-use crate::parser2::path_input::Direction as D;
-use crate::{custom_error::AocErrorDay08, parser2::process_input};
+use std::collections::HashSet;
+
 use anyhow::Result;
 use nalgebra::{DMatrix, DVector};
 use rayon::prelude::*;
-use std::collections::HashSet;
 use tracing::{event, Level};
+
+use crate::{
+        custom_error::AocErrorDay08,
+        parser2::{path_input::Direction as D, process_input},
+};
 
 /// Part2 is an easy adaptation from Part1.
 /// BUG: We just need an two sets of indices for all elements ending with A and with Z
@@ -177,9 +181,8 @@ pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
         let mut found = None;
         let mut rotations = 0;
         loop {
-                found = solving_inputs
-                        .par_iter()
-                        .position(|sol| current_input.is_subset(&sol));
+                found = solving_inputs.par_iter()
+                                      .position(|sol| current_input.is_subset(&sol));
                 if found.is_some() {
                         break;
                 };
@@ -190,12 +193,10 @@ pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
                 event!(Level::DEBUG, rotations);
                 event!(Level::TRACE, "current input_vec: {}", current_invec);
         }
-        event!(
-                Level::WARN,
-                "found a solution at: {}_rots + 1+{:?}_steps",
-                rotations,
-                found
-        );
+        event!(Level::WARN,
+               "found a solution at: {}_rots + 1+{:?}_steps",
+               rotations,
+               found);
 
         #[cfg(debug_assertions)]
         {
@@ -211,9 +212,16 @@ pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
 /// Finds the indices of all elements in a vector that are equal to 1.
 fn find_ones_indices(vector: &DVector<u8>) -> HashSet<usize> {
         vector.iter()
-                .enumerate()
-                .filter_map(|(idx, &val)| if val == 1 { Some(idx) } else { None })
-                .collect()
+              .enumerate()
+              .filter_map(|(idx, &val)| {
+                      if val == 1 {
+                              Some(idx)
+                      }
+                      else {
+                              None
+                      }
+              })
+              .collect()
 }
 
 /// Converts a list of indices into a vector of 0s and 1s.
@@ -264,54 +272,57 @@ fn convert_indices_to_vector(idxs: &[usize], max_size: usize) -> DVector<u8> {
 /// ];
 /// assert_eq!(solving_inputs, expected);
 /// ```
-pub fn calculate_solving_inputs(
-        matrices: &[DMatrix<u8>],
-        solution_idxs: &Vec<usize>,
-) -> Vec<HashSet<usize>> {
+pub fn calculate_solving_inputs(matrices: &[DMatrix<u8>],
+                                solution_idxs: &Vec<usize>)
+                                -> Vec<HashSet<usize>> {
         let solution_vector = convert_indices_to_vector(&solution_idxs, matrices[0].ncols());
-        let result: Vec<HashSet<usize>> = matrices
-                .iter()
-                .map(|mat| {
-                        let transposed_mat = mat.transpose();
-                        let result = &transposed_mat * &solution_vector;
+        let result: Vec<HashSet<usize>> = matrices.iter()
+                                                  .map(|mat| {
+                                                          let transposed_mat = mat.transpose();
+                                                          let result = &transposed_mat
+                                                                       * &solution_vector;
 
-                        // Collect indices of ones
-                        result.iter()
-                                .enumerate()
-                                .filter_map(|(idx, &val)| if val == 1 { Some(idx) } else { None })
-                                .collect::<HashSet<usize>>()
-                })
-                .collect();
+                                                          // Collect indices of ones
+                                                          result.iter()
+                                                                .enumerate()
+                                                                .filter_map(|(idx, &val)| {
+                                                                        if val == 1 {
+                                                                                Some(idx)
+                                                                        }
+                                                                        else {
+                                                                                None
+                                                                        }
+                                                                })
+                                                                .collect::<HashSet<usize>>()
+                                                  })
+                                                  .collect();
         result
 }
 
-fn dirs_to_paths(
-        directions_vec: &[D],
-        path_choices: (&DMatrix<u8>, &DMatrix<u8>),
-) -> Vec<DMatrix<u8>> {
+fn dirs_to_paths(directions_vec: &[D],
+                 path_choices: (&DMatrix<u8>, &DMatrix<u8>))
+                 -> Vec<DMatrix<u8>> {
         let (l_mat, r_mat) = path_choices;
 
-        directions_vec
-                .iter()
-                .map(|dir| match dir {
-                        D::Left => l_mat,
-                        D::Right => r_mat,
-                })
-                .scan(
-                        nalgebra::DMatrix::identity(l_mat.nrows(), l_mat.ncols()),
-                        |acc, mat| {
-                                let new_mat = mat * &*acc;
-                                *acc = new_mat.clone();
-                                Some(new_mat)
-                        },
-                )
-                .collect::<Vec<_>>()
+        directions_vec.iter()
+                      .map(|dir| match dir {
+                              D::Left => l_mat,
+                              D::Right => r_mat,
+                      })
+                      .scan(nalgebra::DMatrix::identity(l_mat.nrows(), l_mat.ncols()),
+                            |acc, mat| {
+                                    let new_mat = mat * &*acc;
+                                    *acc = new_mat.clone();
+                                    Some(new_mat)
+                            })
+                      .collect::<Vec<_>>()
 }
 
 #[cfg(test)]
 mod tests {
-        use super::*;
         use indoc::indoc;
+
+        use super::*;
 
         #[test]
         fn test_process_example_1() -> Result<()> {

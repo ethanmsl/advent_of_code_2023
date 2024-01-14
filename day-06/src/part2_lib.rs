@@ -1,12 +1,13 @@
 //! Library code for Part 2 of Day 06 of Advent of Code 2023.
 //! `bin > part2.rs` will run this code along with conent of `input2.txt`
 
-use crate::custom_error::AocErrorDay06;
 use anyhow::Result;
 use derive_more::Constructor;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use tracing::{debug, trace};
+
+use crate::custom_error::AocErrorDay06;
 
 static RE_TIME: Lazy<Regex> = Lazy::new(|| Regex::new(r"Time: (?<time>.*)$").unwrap());
 static RE_DIST: Lazy<Regex> = Lazy::new(|| Regex::new(r"Distance: (?<dist>.*)$").unwrap());
@@ -43,19 +44,27 @@ pub fn process(input: &str) -> Result<usize> {
 /// joining and parsing
 fn input_to_game(inp: &str) -> Result<GameStats> {
         let mut lines = inp.lines();
-        let line = lines.next().expect("missing line 1");
-        let Some(_) = RE_TIME.captures(line) else {
+        let line = lines.next()
+                        .expect("missing line 1");
+        let Some(_) = RE_TIME.captures(line)
+        else {
                 Err(AocErrorDay06::ParseError("Missing Time Line".to_string()))?
         };
 
-        let nums: Vec<_> = RE_NUM.find_iter(line).map(|m| m.as_str()).collect();
+        let nums: Vec<_> = RE_NUM.find_iter(line)
+                                 .map(|m| m.as_str())
+                                 .collect();
         let time = nums.join("").parse::<u64>()?;
 
-        let line = lines.next().expect("missing line 2");
-        let Some(_) = RE_DIST.captures(line) else {
+        let line = lines.next()
+                        .expect("missing line 2");
+        let Some(_) = RE_DIST.captures(line)
+        else {
                 Err(AocErrorDay06::ParseError("Missing Dist. Line".to_string()))?
         };
-        let nums: Vec<_> = RE_NUM.find_iter(line).map(|m| m.as_str()).collect();
+        let nums: Vec<_> = RE_NUM.find_iter(line)
+                                 .map(|m| m.as_str())
+                                 .collect();
         let dist = nums.join("").parse::<u64>()?;
 
         Ok(GameStats::new(time, dist))
@@ -64,7 +73,7 @@ fn input_to_game(inp: &str) -> Result<GameStats> {
 /// Game's allowed time and best record distance.
 #[derive(Debug, Constructor)]
 struct GameStats {
-        max_time: u64,
+        max_time:    u64,
         record_dist: u64,
 }
 
@@ -105,8 +114,9 @@ fn lower_bound_solution(max_time: u64, record_dist: u64) -> u64 {
 
 #[cfg(test)]
 mod tests {
-        use super::*;
         use indoc::indoc;
+
+        use super::*;
 
         #[test]
         fn test_process_example() -> Result<()> {

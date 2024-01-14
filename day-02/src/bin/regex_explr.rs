@@ -29,33 +29,36 @@ const BLUE_PAT: &str = r"(\d+) blue";
 /// ... I should just have defined the regex as static with lazy
 /// and then iterated over them.
 fn extract_data(hay: &str) -> Vec<u32> {
-        let id = regex_lazyonce!(ID_PAT)
-                .captures(hay)
-                .expect("captures iter failure")
-                .get(1)
-                .map(|v| v.as_str().parse::<u32>().expect("id parse failure"))
-                .expect("iteration failure");
-        let r_sum = regex_lazyonce!(RED_PAT)
-                .captures_iter(hay)
-                .map(|c| {
-                        let (_, [val]) = c.extract();
-                        val.parse::<u32>().expect("red parse failure")
-                })
-                .sum();
-        let g_sum = regex_lazyonce!(GREEN_PAT)
-                .captures_iter(hay)
-                .map(|c| {
-                        let (_, [val]) = c.extract();
-                        val.parse::<u32>().expect("green parse failure")
-                })
-                .sum();
-        let b_sum = regex_lazyonce!(BLUE_PAT)
-                .captures_iter(hay)
-                .map(|c| {
-                        let (_, [val]) = c.extract();
-                        val.parse::<u32>().expect("blue parse failure")
-                })
-                .sum();
+        let id = regex_lazyonce!(ID_PAT).captures(hay)
+                                        .expect("captures iter failure")
+                                        .get(1)
+                                        .map(|v| {
+                                                v.as_str()
+                                                 .parse::<u32>()
+                                                 .expect("id parse failure")
+                                        })
+                                        .expect("iteration failure");
+        let r_sum = regex_lazyonce!(RED_PAT).captures_iter(hay)
+                                            .map(|c| {
+                                                    let (_, [val]) = c.extract();
+                                                    val.parse::<u32>()
+                                                       .expect("red parse failure")
+                                            })
+                                            .sum();
+        let g_sum = regex_lazyonce!(GREEN_PAT).captures_iter(hay)
+                                              .map(|c| {
+                                                      let (_, [val]) = c.extract();
+                                                      val.parse::<u32>()
+                                                         .expect("green parse failure")
+                                              })
+                                              .sum();
+        let b_sum = regex_lazyonce!(BLUE_PAT).captures_iter(hay)
+                                             .map(|c| {
+                                                     let (_, [val]) = c.extract();
+                                                     val.parse::<u32>()
+                                                        .expect("blue parse failure")
+                                             })
+                                             .sum();
         vec![id, r_sum, g_sum, b_sum]
 }
 

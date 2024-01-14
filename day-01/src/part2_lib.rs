@@ -1,9 +1,10 @@
 //! Library code for Part 2 of Day 01 of Advent of Code 2023.
 //! `bin > part2.rs` will run this code along with conent of `input2.txt`
 
-use crate::custom_error::AocError;
 use miette::Result;
 use tracing::info;
+
+use crate::custom_error::AocError;
 
 /// Take first and last digit char or digit word (may be the same!)
 /// from each line to form a number.
@@ -17,10 +18,9 @@ pub fn process(input: &str) -> Result<u32, AocError> {
         // lines
         for ln in input.lines() {
                 // ascii digits
-                let chars: Vec<char> = prepend_digits_to_words(ln)
-                        .chars()
-                        .filter(|c| c.is_ascii_digit())
-                        .collect();
+                let chars: Vec<char> = prepend_digits_to_words(ln).chars()
+                                                                  .filter(|c| c.is_ascii_digit())
+                                                                  .collect();
 
                 info!("{:?}", chars);
 
@@ -31,7 +31,7 @@ pub fn process(input: &str) -> Result<u32, AocError> {
                                 Ok(num) => nums.push(num),
                                 Err(_) => {
                                         panic!("Could not parse: {} \nfrom line: {}", str_num, ln)
-                                }
+                                },
                         }
                 }
         }
@@ -54,9 +54,8 @@ pub fn process(input: &str) -> Result<u32, AocError> {
 fn prepend_digits_to_words(input: &str) -> String {
         let mut output: Vec<char> = input.chars().collect();
         let mut replace_notes = Vec::<(usize, &str)>::new();
-        let replace_sets = vec![
-                "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
-        ];
+        let replace_sets =
+                vec!["one", "two", "three", "four", "five", "six", "seven", "eight", "nine",];
 
         for pat in replace_sets {
                 replace_notes.extend(input.match_indices(pat));
@@ -77,7 +76,8 @@ fn prepend_digits_to_words(input: &str) -> String {
                 output[idx] = add;
         }
 
-        output.into_iter().collect::<String>()
+        output.into_iter()
+              .collect::<String>()
 }
 
 #[tracing::instrument(level = "trace", skip(input))]
@@ -92,26 +92,23 @@ fn prepend_digits_to_words(input: &str) -> String {
 /// NOTE: hackish fix, sorted in order of length, with hand check for no overlap
 fn words_to_digits(input: &str) -> String {
         // making compatible with our old version
-        let replace_sets = vec![
-                // 5
-                ("seven", "7"),
-                ("eight", "8"),
-                ("three", "3"),
-                // 4
-                ("four", "4"),
-                ("five", "5"),
-                ("nine", "9"),
-                // 3
-                ("one", "1"),
-                ("two", "2"),
-                ("six", "6"),
-        ];
+        let replace_sets = vec![// 5
+                                ("seven", "7"),
+                                ("eight", "8"),
+                                ("three", "3"),
+                                // 4
+                                ("four", "4"),
+                                ("five", "5"),
+                                ("nine", "9"),
+                                // 3
+                                ("one", "1"),
+                                ("two", "2"),
+                                ("six", "6"),];
 
-        replace_sets
-                .iter()
-                .fold(input.to_string(), |acc, (word, digit)| {
-                        acc.replace(word, digit)
-                })
+        replace_sets.iter()
+                    .fold(input.to_string(), |acc, (word, digit)| {
+                            acc.replace(word, digit)
+                    })
 }
 
 #[cfg(test)]

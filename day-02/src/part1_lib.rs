@@ -1,8 +1,9 @@
 //! Library code for Part 1 of Day 02 of Advent of Code 2023.
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
 
-use crate::custom_error::AocErrorDay02;
 use anyhow::Result;
+
+use crate::custom_error::AocErrorDay02;
 
 /// Example helpfully provided by the `once_cell` crate's documentation.
 ///
@@ -33,18 +34,16 @@ const ID_PAT: &str = r"Game (\d+):";
 const RED_PAT: &str = r"(\d+) red";
 const GREEN_PAT: &str = r"(\d+) green";
 const BLUE_PAT: &str = r"(\d+) blue";
-const MAX_CUBES: Cubes = Cubes {
-        red: 12,
-        green: 13,
-        blue: 14,
-};
+const MAX_CUBES: Cubes = Cubes { red:   12,
+                                 green: 13,
+                                 blue:  14, };
 
 /// set of cubes
 #[derive(Debug, PartialEq)]
 struct Cubes {
-        red: u64,
+        red:   u64,
         green: u64,
-        blue: u64,
+        blue:  u64,
 }
 
 impl Cubes {
@@ -72,51 +71,51 @@ pub fn process(input: &str) -> Result<u64, AocErrorDay02> {
 /// ... I should just have defined the regex as static with lazy
 /// and then iterated over them.
 fn extract_data(hay: &str) -> (u64, Cubes) {
-        let id = regex_lazyonce!(ID_PAT)
-                .captures(hay)
-                .expect("captures iter failure")
-                .get(1)
-                .map(|v| v.as_str().parse::<u64>().expect("id parse failure"))
-                .expect("iteration failure");
-        let r_sum = regex_lazyonce!(RED_PAT)
-                .captures_iter(hay)
-                .map(|c| {
-                        let (_, [val]) = c.extract();
-                        val.parse::<u64>().expect("red parse failure")
-                })
-                .max()
-                .unwrap_or(0);
-        let g_sum = regex_lazyonce!(GREEN_PAT)
-                .captures_iter(hay)
-                .map(|c| {
-                        let (_, [val]) = c.extract();
-                        val.parse::<u64>().expect("green parse failure")
-                })
-                .max()
-                .unwrap_or(0);
-        let b_sum = regex_lazyonce!(BLUE_PAT)
-                .captures_iter(hay)
-                .map(|c| {
-                        let (_, [val]) = c.extract();
-                        val.parse::<u64>().expect("blue parse failure")
-                })
-                .max()
-                .unwrap_or(0);
+        let id = regex_lazyonce!(ID_PAT).captures(hay)
+                                        .expect("captures iter failure")
+                                        .get(1)
+                                        .map(|v| {
+                                                v.as_str()
+                                                 .parse::<u64>()
+                                                 .expect("id parse failure")
+                                        })
+                                        .expect("iteration failure");
+        let r_sum = regex_lazyonce!(RED_PAT).captures_iter(hay)
+                                            .map(|c| {
+                                                    let (_, [val]) = c.extract();
+                                                    val.parse::<u64>()
+                                                       .expect("red parse failure")
+                                            })
+                                            .max()
+                                            .unwrap_or(0);
+        let g_sum = regex_lazyonce!(GREEN_PAT).captures_iter(hay)
+                                              .map(|c| {
+                                                      let (_, [val]) = c.extract();
+                                                      val.parse::<u64>()
+                                                         .expect("green parse failure")
+                                              })
+                                              .max()
+                                              .unwrap_or(0);
+        let b_sum = regex_lazyonce!(BLUE_PAT).captures_iter(hay)
+                                             .map(|c| {
+                                                     let (_, [val]) = c.extract();
+                                                     val.parse::<u64>()
+                                                        .expect("blue parse failure")
+                                             })
+                                             .max()
+                                             .unwrap_or(0);
 
-        (
-                id,
-                Cubes {
-                        red: r_sum,
-                        green: g_sum,
-                        blue: b_sum,
-                },
-        )
+        (id,
+         Cubes { red:   r_sum,
+                 green: g_sum,
+                 blue:  b_sum, })
 }
 
 #[cfg(test)]
 mod tests {
-        use super::*;
         use indoc::indoc;
+
+        use super::*;
 
         #[test]
         fn test_process_example() -> Result<()> {

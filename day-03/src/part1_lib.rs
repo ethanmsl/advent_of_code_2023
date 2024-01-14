@@ -1,10 +1,13 @@
 //! Library code for Part 1 of Day 03 of Advent of Code 2023.
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
 
-use crate::custom_error::AocErrorDay03;
-use crate::data_types_part1::{NumberRegister, SpecialAdjacenciesRegister};
 use miette::Result;
 use tracing::info;
+
+use crate::{
+        custom_error::AocErrorDay03,
+        data_types_part1::{NumberRegister, SpecialAdjacenciesRegister},
+};
 
 /// Return sum of values adjacent to special chars
 ///
@@ -25,10 +28,12 @@ pub fn process(input: &str) -> Result<u64, AocErrorDay03> {
         let mut adjacencies = SpecialAdjacenciesRegister::new();
 
         // register numbers & special chars
-        input.lines().enumerate().for_each(|(row, raw_line)| {
-                numbers.register_numbers(row as i64, raw_line);
-                adjacencies.register_special_adjacencies(row as i64, raw_line);
-        });
+        input.lines()
+             .enumerate()
+             .for_each(|(row, raw_line)| {
+                     numbers.register_numbers(row as i64, raw_line);
+                     adjacencies.register_special_adjacencies(row as i64, raw_line);
+             });
 
         info!("numbers: {:?}", numbers);
         info!("adjacencies: {:?}", adjacencies);
@@ -48,8 +53,9 @@ pub fn process(input: &str) -> Result<u64, AocErrorDay03> {
 
 #[cfg(test)]
 mod tests {
-        use super::*;
         use indoc::indoc;
+
+        use super::*;
 
         #[test]
         fn test_process_example() -> Result<()> {

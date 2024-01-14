@@ -1,7 +1,6 @@
 //! Library code for Part 1 of Day 06 of Advent of Code 2023.
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
 
-use crate::custom_error::AocErrorDay06;
 use anyhow::Result;
 use derive_more::Constructor;
 use once_cell::sync::Lazy;
@@ -9,6 +8,8 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 // use std::ops::RangeInclusive;
 use tracing::{debug, info, trace};
+
+use crate::custom_error::AocErrorDay06;
 
 static RE_TIME: Lazy<Regex> = Lazy::new(|| Regex::new(r"Time: (?<time>.*)$").unwrap());
 static RE_DIST: Lazy<Regex> = Lazy::new(|| Regex::new(r"Distance: (?<dist>.*)$").unwrap());
@@ -50,23 +51,33 @@ pub fn process(input: &str) -> Result<usize> {
 /// Hard coding input.
 fn input_to_games(inp: &str) -> Result<Vec<GameStats>> {
         let mut lines = inp.lines();
-        let line = lines.next().expect("missing line 1");
-        let Some(_) = RE_TIME.captures(line) else {
+        let line = lines.next()
+                        .expect("missing line 1");
+        let Some(_) = RE_TIME.captures(line)
+        else {
                 Err(AocErrorDay06::ParseError("Missing Time Line".to_string()))?
         };
-        let times: Vec<_> = RE_NUM
-                .find_iter(line)
-                .map(|m| m.as_str().parse::<i64>().expect("parse failure"))
-                .collect();
+        let times: Vec<_> = RE_NUM.find_iter(line)
+                                  .map(|m| {
+                                          m.as_str()
+                                           .parse::<i64>()
+                                           .expect("parse failure")
+                                  })
+                                  .collect();
 
-        let line = lines.next().expect("missing line 2");
-        let Some(_) = RE_DIST.captures(line) else {
+        let line = lines.next()
+                        .expect("missing line 2");
+        let Some(_) = RE_DIST.captures(line)
+        else {
                 Err(AocErrorDay06::ParseError("Missing Dist. Line".to_string()))?
         };
-        let dists: Vec<_> = RE_NUM
-                .find_iter(line)
-                .map(|m| m.as_str().parse::<i64>().expect("parse failure"))
-                .collect();
+        let dists: Vec<_> = RE_NUM.find_iter(line)
+                                  .map(|m| {
+                                          m.as_str()
+                                           .parse::<i64>()
+                                           .expect("parse failure")
+                                  })
+                                  .collect();
         Ok(times.into_iter()
                 .zip(dists)
                 .map(|(t, d)| GameStats::new(t as u64, d as u64))
@@ -76,7 +87,7 @@ fn input_to_games(inp: &str) -> Result<Vec<GameStats>> {
 /// Game's allowed time and best record distance.
 #[derive(Debug, Constructor)]
 struct GameStats {
-        max_time: u64,
+        max_time:    u64,
         record_dist: u64,
 }
 
@@ -117,8 +128,9 @@ fn lower_bound_solution(max_time: u64, record_dist: u64) -> u64 {
 
 #[cfg(test)]
 mod tests {
-        use super::*;
         use indoc::indoc;
+
+        use super::*;
 
         #[test]
         fn test_process_example() -> Result<()> {

@@ -1,11 +1,14 @@
 //! Library code for Part 1 of Day 08 of Advent of Code 2023.
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
 
-use crate::parser1::path_input::Direction as D;
-use crate::{custom_error::AocErrorDay08, parser1::process_input};
 use anyhow::Result;
 use nalgebra::DMatrix;
 use tracing::{event, Level};
+
+use crate::{
+        custom_error::AocErrorDay08,
+        parser1::{path_input::Direction as D, process_input},
+};
 
 /// Time for a repeatable path to find a solution.
 /// Binary regex's minimum expansion size if given the finite automata.
@@ -83,53 +86,45 @@ pub fn process(input: &str) -> Result<usize, AocErrorDay08> {
         event!(Level::TRACE, "r_mat: {}", r_mat);
         let fp_len = dirs.len();
         event!(Level::WARN, "dirs len: {:?}", fp_len);
-        event!(
-                Level::WARN,
-                "l_mat, rows x cols: {} x {}",
-                l_mat.nrows(),
-                l_mat.ncols()
-        );
+        event!(Level::WARN,
+               "l_mat, rows x cols: {} x {}",
+               l_mat.nrows(),
+               l_mat.ncols());
 
         // Basic matrix multiplication
-        let trips = dirs
-                .iter()
-                .map(|dir| match dir {
-                        D::Left => &l_mat,
-                        D::Right => &r_mat,
-                })
-                .scan(
-                        nalgebra::DMatrix::identity(l_mat.nrows(), l_mat.ncols()),
-                        |acc, mat| {
-                                let new_mat = mat * &*acc;
-                                *acc = new_mat.clone();
-                                Some(new_mat)
-                        },
-                )
-                .collect::<Vec<_>>();
+        let trips = dirs.iter()
+                        .map(|dir| match dir {
+                                D::Left => &l_mat,
+                                D::Right => &r_mat,
+                        })
+                        .scan(nalgebra::DMatrix::identity(l_mat.nrows(), l_mat.ncols()),
+                              |acc, mat| {
+                                      let new_mat = mat * &*acc;
+                                      *acc = new_mat.clone();
+                                      Some(new_mat)
+                              })
+                        .collect::<Vec<_>>();
 
         #[cfg(debug_assertions)]
         {
                 for (id, mat) in trips.iter().enumerate() {
-                        event!(
-                                Level::TRACE,
-                                "\nmat[{}]: dirs[0..=id]: {:?} \n {}",
-                                id,
-                                dirs[0..=id].iter().collect::<Vec<_>>(),
-                                mat,
-                        );
+                        event!(Level::TRACE,
+                               "\nmat[{}]: dirs[0..=id]: {:?} \n {}",
+                               id,
+                               dirs[0..=id].iter()
+                                           .collect::<Vec<_>>(),
+                               mat,);
                 }
         }
 
         let full_trip_matrix = &trips[fp_len - 1];
         let (ub, final_start_idx) =
                 get_upper_bound(full_trip_matrix, 100).expect("no upperbound solution found");
-        event!(
-                Level::INFO,
-                "ub: {:?} * {} (length of full rotation), with final start index of: {}",
-                ub,
-                fp_len,
-                final_start_idx,
-        );
+        event!(Level::INFO,
+               "ub: {:?} * {} (length of full rotation), with final start index of: {}",
+               ub,
+               fp_len,
+               final_start_idx,);
         let remainder_trips =
                 get_trips_to_end(&trips, final_start_idx).expect("no remainder solution found");
         let total_trips = (ub - 1) * dirs.len() + remainder_trips + 1;
@@ -147,7 +142,9 @@ fn get_upper_bound(mat: &DMatrix<u8>, some_reasonable_limit: usize) -> Option<(u
 
         for n in 1..=some_reasonable_limit {
                 // Only one non-zero per column
-                let next_index = mat.column(current_index).iter().position(|&x| x != 0)?;
+                let next_index = mat.column(current_index)
+                                    .iter()
+                                    .position(|&x| x != 0)?;
 
                 // ZZZ is always len()-1
                 if next_index == size - 1 {
@@ -162,13 +159,18 @@ fn get_upper_bound(mat: &DMatrix<u8>, some_reasonable_limit: usize) -> Option<(u
 
 /// Returns the number of trips it takes to get to the same ZZZ index from a given start index
 fn get_trips_to_end(trips: &[DMatrix<u8>], start_index: usize) -> Option<usize> {
-        let size = trips.first().expect("empty matrix vector").clone().ncols();
+        let size = trips.first()
+                        .expect("empty matrix vector")
+                        .clone()
+                        .ncols();
 
         event!(Level::TRACE, "trips: {:?}", trips);
         event!(Level::DEBUG, "start_index: {:?}", start_index);
         for (n, mat) in trips.iter().enumerate() {
                 // Only one non-zero per column
-                let next_index = mat.column(start_index).iter().position(|&x| x != 0)?;
+                let next_index = mat.column(start_index)
+                                    .iter()
+                                    .position(|&x| x != 0)?;
 
                 // ZZZ is always len()-1
                 if next_index == size - 1 {
@@ -199,8 +201,9 @@ fn get_trips_to_end(trips: &[DMatrix<u8>], start_index: usize) -> Option<usize> 
 
 #[cfg(test)]
 mod tests {
-        use super::*;
         use indoc::indoc;
+
+        use super::*;
 
         #[test]
         fn test_process_example_1() -> Result<()> {

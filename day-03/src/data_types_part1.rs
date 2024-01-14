@@ -1,9 +1,10 @@
 //! Objects for Day-03
+use std::collections::HashSet;
+
 use derive_more::{AsMut, AsRef, Constructor, IntoIterator};
 use itertools::Itertools;
 use once_cell::sync::Lazy;
 use regex::Regex;
-use std::collections::HashSet;
 use tracing::info;
 
 /// A simple vec of relevant info for each number
@@ -22,14 +23,17 @@ impl NumberRegister {
         pub fn register_numbers(&mut self, row: i64, raw_line: &str) {
                 static RE_NUMBER: Lazy<Regex> = Lazy::new(|| Regex::new(r"\d+").unwrap());
 
-                RE_NUMBER.find_iter(raw_line).for_each(|m| {
-                        let (h_start, _) = (m.start() as i64, m.end());
-                        let len = m.len() as i64;
-                        let val = m.as_str().parse::<u64>().expect("parse failure");
-                        let start_loc = (row, h_start);
-                        let numinfo = NumberInfo::new(start_loc, len, val);
-                        self.vec.push(numinfo);
-                });
+                RE_NUMBER.find_iter(raw_line)
+                         .for_each(|m| {
+                                 let (h_start, _) = (m.start() as i64, m.end());
+                                 let len = m.len() as i64;
+                                 let val = m.as_str()
+                                            .parse::<u64>()
+                                            .expect("parse failure");
+                                 let start_loc = (row, h_start);
+                                 let numinfo = NumberInfo::new(start_loc, len, val);
+                                 self.vec.push(numinfo);
+                         });
         }
 }
 
@@ -39,8 +43,8 @@ impl NumberRegister {
 #[derive(Constructor, AsRef, AsMut, Debug)]
 pub struct NumberInfo {
         start_loc: (i64, i64),
-        len: i64,
-        val: u64,
+        len:       i64,
+        val:       u64,
 }
 
 impl PartialEq for NumberInfo {
@@ -82,9 +86,7 @@ pub struct SpecialAdjacenciesRegister {
 impl SpecialAdjacenciesRegister {
         /// Constructor
         pub fn new() -> Self {
-                Self {
-                        set: HashSet::new(),
-                }
+                Self { set: HashSet::new(), }
         }
 
         /// Register all adjacencies (inclusive of number itself)
@@ -92,11 +94,12 @@ impl SpecialAdjacenciesRegister {
                 // `[^.\d]` any char that's neither a literal `.` nor digit
                 // (`.` is taken literally inside brackets, vs being an almost-any char normally)
                 static RE_SPECIAL: Lazy<Regex> = Lazy::new(|| Regex::new(r"[^.\d]").unwrap());
-                RE_SPECIAL.find_iter(raw_line).for_each(|m| {
-                        info!("m: {:?}", m);
-                        let char_loc = m.start() as i64;
-                        self.calculate_adjacencies(row, char_loc);
-                });
+                RE_SPECIAL.find_iter(raw_line)
+                          .for_each(|m| {
+                                  info!("m: {:?}", m);
+                                  let char_loc = m.start() as i64;
+                                  self.calculate_adjacencies(row, char_loc);
+                          });
         }
 
         /// all the locations of a char +/-1
@@ -110,9 +113,8 @@ impl SpecialAdjacenciesRegister {
         /// constantly locally..
         fn calculate_adjacencies(&mut self, row: i64, col: i64) {
                 // to avoid recasting we use delta of + of our fix
-                let it_δ = (0..=2)
-                        .cartesian_product(0..=2)
-                        .map(|(x, y)| (x - 1, y - 1));
+                let it_δ = (0..=2).cartesian_product(0..=2)
+                                  .map(|(x, y)| (x - 1, y - 1));
                 let it_adj = it_δ.map(|(rδ, cδ)| (rδ + row, cδ + col));
                 // // TODO: check bounds
                 // // for right now this is merely a PERF issue

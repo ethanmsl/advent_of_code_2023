@@ -6,14 +6,16 @@ use tracing::{event, Level};
 #[tracing::instrument]
 fn kilo(lex: &mut Lexer<Token>) -> Option<u64> {
         let slice = lex.slice();
-        let n: u64 = slice[..slice.len() - 1].parse().ok()?; // skip 'k'
+        let n: u64 = slice[..slice.len() - 1].parse()
+                                             .ok()?; // skip 'k'
         Some(n * 1_000)
 }
 
 #[tracing::instrument]
 fn mega(lex: &mut Lexer<Token>) -> Option<u64> {
         let slice = lex.slice();
-        let n: u64 = slice[..slice.len() - 1].parse().ok()?; // skip 'm'
+        let n: u64 = slice[..slice.len() - 1].parse()
+                                             .ok()?; // skip 'm'
         Some(n * 1_000_000)
 }
 

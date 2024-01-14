@@ -1,8 +1,9 @@
 //! Library code for Part 1 of Day 01 of Advent of Code 2023.
 //! `bin > part1.rs` will run this code along with conent of `input1.txt`
 
-use crate::custom_error::AocError;
 use miette::Result;
+
+use crate::custom_error::AocError;
 
 /// Take first and last digit char (may be the same!)
 /// from each line to form a number.
@@ -14,7 +15,9 @@ pub fn process(input: &str) -> Result<u32, AocError> {
         // lines
         for ln in input.lines() {
                 // ascii digits
-                let chars: Vec<char> = ln.chars().filter(|c| c.is_ascii_digit()).collect();
+                let chars: Vec<char> = ln.chars()
+                                         .filter(|c| c.is_ascii_digit())
+                                         .collect();
 
                 // extracting, formatting, parsing, pushing
                 if let (Some(&first), Some(&last)) = (chars.first(), chars.last()) {
@@ -23,7 +26,7 @@ pub fn process(input: &str) -> Result<u32, AocError> {
                                 Ok(num) => nums.push(num),
                                 Err(_) => {
                                         panic!("Could not parse: {} \nfrom line: {}", str_num, ln)
-                                }
+                                },
                         }
                 }
         }
